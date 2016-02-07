@@ -1,9 +1,6 @@
 (ns reagent-spreadsheet.core
-  (:require
-   [reagent.core :as reagent])
-  (:require-macros
-   [devcards.core :as dc :refer [defcard]]))
+  (:require [reagent.core :as reagent]))
 
-(defcard my-first-card
-  (dc/reagent
-   [:h1 "Devcards is freaking awesome!"]))
+(defn spreadsheet
+  []
+  [:h1 "This is a spreadsheet!"])
