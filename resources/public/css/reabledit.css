@@ -1,3 +1,14 @@
-h1 {
-    color: red;
+.reabledit table {
+  width: 100%;
+  border: 2px solid #ddd;
+  border-collapse: collapse;
+}
+
+.reabledit th, .reabledit td {
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+.reabledit th {
+  background-color: #f3f3f3;
 }
