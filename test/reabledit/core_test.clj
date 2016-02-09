@@ -1,6 +1,6 @@
-(ns reagent-spreadsheet.core-test
+(ns reabledit.core-test
   (:require [clojure.test :refer :all]
-            [reagent-spreadsheet.core :refer :all]))
+            [reabledit.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."

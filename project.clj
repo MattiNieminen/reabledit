@@ -1,5 +1,5 @@
-(defproject reagent-spreadsheet "0.1.0-SNAPSHOT"
-  :description "Minimal Reagent component that mimics spreadsheet applications like Excel"
+(defproject reabledit "0.1.0-SNAPSHOT"
+  :description "Minimalistic Reagent component for editing rows of data in a table"
   :url "https://github.com/MattiNieminen/reagent-spreadsheet"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -13,9 +13,9 @@
    [{:id "devcards"
      :source-paths ["example-src" "src"]
      :figwheel {:devcards true}
-     :compiler {:main "devdemo.core"
+     :compiler {:main "devdemos.core"
                 :asset-path "js/compiled/devcards_out"
-                :output-to "example-resources/public/js/compiled/reagent-spreadsheet_devcards.js"
+                :output-to "example-resources/public/js/compiled/reabledit_devcards.js"
                 :output-dir "example-resources/public/js/compiled/devcards_out"
                 :optimizations :none
                 :source-map-timestamp true}}]}

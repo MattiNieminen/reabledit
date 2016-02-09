@@ -1,8 +1,8 @@
-(ns devdemo.core
+(ns devdemos.core
   (:require [reagent.core :as reagent]
-            [reagent-spreadsheet.core :as spreadsheet])
+            [reabledit.core :as reabledit])
   (:require-macros [devcards.core :as dc :refer [defcard]]))
 
 (defcard reagent-spreadsheet
   (dc/reagent
-   [spreadsheet/spreadsheet]))
+   [reabledit/table-edit]))

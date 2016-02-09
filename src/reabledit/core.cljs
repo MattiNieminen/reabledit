@@ -1,6 +1,6 @@
-(ns reagent-spreadsheet.core
+(ns reabledit.core
   (:require [reagent.core :as reagent]))
 
-(defn spreadsheet
+(defn table-edit
   []
   [:h1 "This is a spreadsheet!"])
