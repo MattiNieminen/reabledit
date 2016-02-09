@@ -22,4 +22,5 @@
   :profiles {:dev
              {:dependencies [[devcards "0.2.1-6"]]
               :plugins [[lein-figwheel "0.5.0-6"]]
-              :resource-paths ["resources" "example-resources"]}})
+              :resource-paths ["resources" "example-resources"]}}
+  :figwheel {:css-dirs ["resources/public/css"]})
