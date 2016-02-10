@@ -9,12 +9,23 @@
   [ui-state row col]
   (swap! ui-state assoc :selected [row col]))
 
+(defn set-edited!
+  [ui-state row col]
+  (swap! ui-state assoc :edited [row col]))
 
 ;;
 ;; Keyboard event handlers
 ;;
 
-(defn handle-key-down
+(defn handle-editing-mode-key-down
+  [e ui-state id]
+  (if (= 13 (.-keyCode e))
+    (do (swap! ui-state dissoc :edited)
+        ;; Dirty as fudge, but what can you do with Reagent?
+        (.focus (.getElementById js/document id)))
+    nil))
+
+(defn handle-selection-mode-key-down
   [e rows cols ui-state]
   (let [keycode (.-keyCode e)
         current-row (first (:selected @ui-state))
@@ -25,7 +36,16 @@
       38 (f (max 0 (dec current-row)) current-col)
       39 (f current-row (min (dec cols) (inc current-col)))
       40 (f (min (dec rows) (inc current-row)) current-col)
+      9 (f current-row (min (dec cols) (inc current-col)))
+      13 (set-edited! ui-state current-row current-col)
       nil)))
+
+(defn handle-key-down
+  [e rows cols ui-state id]
+  (.preventDefault e)
+  (if (:edited @ui-state)
+    (handle-editing-mode-key-down e ui-state id)
+    (handle-selection-mode-key-down e rows cols ui-state)))
 
 ;;
 ;; Components
@@ -33,8 +53,15 @@
 
 (defn data-table-cell
   [v nth-row nth-col ui-state]
-  [:td {:class (if (= (:selected @ui-state) [nth-row nth-col]) "selected")
-        :on-click #(set-selected! ui-state nth-row nth-col)} v])
+  (let [selected? (= (:selected @ui-state) [nth-row nth-col])
+        edited? (= (:edited @ui-state) [nth-row nth-col])]
+    [:td {:class (if selected? "selected")
+          :on-click #(set-selected! ui-state nth-row nth-col)}
+     (if edited?
+       [:input {:type "text"
+                :auto-focus true
+                :value v}]
+       [:span v])]))
 
 (defn data-table-row
   [headers row-data nth-row ui-state]
@@ -53,11 +80,17 @@
 
 (defn data-table
   [headers data]
-  (let [ui-state (reagent/atom {})]
+  (let [ui-state (reagent/atom {})
+        id (gensym "reabledit-focusable")]
     (fn [headers data]
       [:div.reabledit
-       {:tabIndex 0
-        :on-key-down #(handle-key-down % (count data) (count headers) ui-state)}
+       {:id id
+        :tabIndex 0
+        :on-key-down #(handle-key-down %
+                                       (count data)
+                                       (count headers)
+                                       ui-state
+                                       id)}
        [:table
         [data-table-headers headers]
         [:tbody

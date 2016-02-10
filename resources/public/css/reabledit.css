@@ -6,7 +6,9 @@
 
 .reabledit th, .reabledit td {
   border: 1px solid #ddd;
-  padding: 5px;
+  padding: 0;
+  box-sizing: border-box;
+  height: 40px;
 }
 
 .reabledit th {
@@ -16,4 +18,15 @@
 .reabledit td.selected {
   background-color: #f9f9f9;
   border: 2px solid #4ca2d8;
+}
+
+.reabledit td span {
+  padding-left: 7px;
+}
+
+.reabledit td input {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  font-size: 100%;
 }
