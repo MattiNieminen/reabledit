@@ -12,3 +12,8 @@
 .reabledit th {
   background-color: #f3f3f3;
 }
+
+.reabledit td.selected {
+  background-color: #f9f9f9;
+  border: 2px solid #4ca2d8;
+}

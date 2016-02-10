@@ -1,7 +1,7 @@
 (ns devdemos.core
   (:require [reagent.core :as reagent]
             [reabledit.core :as reabledit])
-  (:require-macros [devcards.core :as dc :refer [defcard]]))
+  (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (def example-headers
   [[:name "Name"] [:age "Age"] [:owner "Owner"]])
@@ -20,6 +20,6 @@
     :age "24"
     :owner "Clark Kent"}])
 
-(defcard reabledit
-  (dc/reagent
-   [reabledit/data-table example-headers example-data :id]))
+(defcard-rg reabledit
+  (fn [data-atom _] [reabledit/data-table example-headers @data-atom])
+  (reagent/atom example-data))
