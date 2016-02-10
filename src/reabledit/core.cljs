@@ -20,13 +20,16 @@
 (defn handle-editing-mode-key-down
   [e ui-state id]
   (if (= 13 (.-keyCode e))
-    (do (swap! ui-state dissoc :edit-mode)
-        ;; Dirty as fudge, but what can you do with Reagent?
-        (.focus (.getElementById js/document id)))
+    (do
+      (.preventDefault e)
+      (swap! ui-state dissoc :edit-mode)
+      ;; Dirty as fudge, but what can you do with Reagent?
+      (.focus (.getElementById js/document id)))
     nil))
 
 (defn handle-selection-mode-key-down
   [e rows cols ui-state]
+  (.preventDefault e)
   (let [keycode (.-keyCode e)
         current-row (first (:selected @ui-state))
         current-col (second (:selected @ui-state))
@@ -42,7 +45,6 @@
 
 (defn handle-key-down
   [e rows cols ui-state id]
-  (.preventDefault e)
   (if (:edit-mode @ui-state)
     (handle-editing-mode-key-down e ui-state id)
     (handle-selection-mode-key-down e rows cols ui-state)))
