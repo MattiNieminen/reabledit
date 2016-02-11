@@ -20,6 +20,14 @@
     :age "24"
     :owner "Clark Kent"}])
 
+(defn example-row-fn
+  [old-row new-row]
+  (js/alert (str "Row "
+                 (pr-str old-row)
+                 " was changed into "
+                 (pr-str new-row))))
+
 (defcard-rg reabledit
-  (fn [data-atom _] [reabledit/data-table example-headers @data-atom])
+  (fn [data-atom _]
+    [reabledit/data-table example-headers @data-atom example-row-fn])
   (reagent/atom example-data))

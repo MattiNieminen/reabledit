@@ -20,10 +20,12 @@
 ;;
 
 (defn handle-editing-mode-key-down
-  [e state id]
+  [e state row-change-fn id]
   (if (= 13 (.-keyCode e))
     (do
       (.preventDefault e)
+      (row-change-fn (get-in @state [:edit :initial])
+                     (get-in @state [:edit :updated]))
       (swap! state dissoc :edit)
       ;; Dirty as fudge, but what can you do with Reagent?
       (.focus (.getElementById js/document id)))
@@ -48,34 +50,43 @@
       nil)))
 
 (defn handle-key-down
-  [e headers data state id]
+  [e headers data state row-change-fn id]
   (if (:edit @state)
-    (handle-editing-mode-key-down e state id)
+    (handle-editing-mode-key-down e state row-change-fn id)
     (handle-selection-mode-key-down e headers data state)))
 
 ;;
 ;; Components
 ;;
 
+(defn data-table-cell-input
+  [headers data nth-row nth-col state]
+  (let [k (first (nth headers nth-col))]
+    [:input {:type "text"
+             :auto-focus true
+             :value (get (get-in @state [:edit :updated]) k)
+             :on-change #(swap! state
+                                assoc-in
+                                [:edit :updated k]
+                                (-> % .-target .-value))}]))
+
 (defn data-table-cell
-  [v nth-row nth-col state]
+  [headers data v nth-row nth-col state]
   (let [selected? (= (:selected @state) [nth-row nth-col])
         edit? (:edit @state)]
     [:td {:class (if selected? "selected")
           :on-click #(set-selected! state nth-row nth-col)}
      (if (and selected? edit?)
-       [:input {:type "text"
-                :auto-focus true
-                :value v}]
+       [data-table-cell-input headers data nth-row nth-col state]
        [:span v])]))
 
 (defn data-table-row
-  [headers row-data nth-row state]
+  [headers data row-data nth-row state]
   [:tr
    ;; TODO: run map-indexed to headers only once
    (for [[nth-col [k _]] (map-indexed vector headers)]
      ^{:key nth-col}
-     [data-table-cell (get row-data k) nth-row nth-col state])])
+     [data-table-cell headers data (get row-data k) nth-row nth-col state])])
 
 (defn data-table-headers
   [headers]
@@ -85,17 +96,17 @@
       ^{:key k} [:th localized])]])
 
 (defn data-table
-  [headers data]
+  [headers data row-change-fn]
   (let [state (reagent/atom {})
         id (gensym "reabledit-focusable")]
     (fn [headers data]
       [:div.reabledit
        {:id id
         :tabIndex 0
-        :on-key-down #(handle-key-down % headers data state id)}
+        :on-key-down #(handle-key-down % headers data state row-change-fn id)}
        [:table
         [data-table-headers headers]
         [:tbody
          (for [[nth-row row-data] (map-indexed vector data)]
            ^{:key nth-row}
-           [data-table-row headers row-data nth-row state])]]])))
+           [data-table-row headers data row-data nth-row state])]]])))
