@@ -6,59 +6,59 @@
 ;;
 
 (defn set-selected!
-  [ui-state row col]
-  (swap! ui-state assoc :selected [row col]))
+  [state row col]
+  (swap! state assoc :selected [row col]))
 
 (defn enable-edit-mode!
-  [ui-state row col]
-  (swap! ui-state assoc :edit-mode true))
+  [state row col]
+  (swap! state assoc :edit-mode true))
 
 ;;
 ;; Keyboard event handlers
 ;;
 
 (defn handle-editing-mode-key-down
-  [e ui-state id]
+  [e state id]
   (if (= 13 (.-keyCode e))
     (do
       (.preventDefault e)
-      (swap! ui-state dissoc :edit-mode)
+      (swap! state dissoc :edit-mode)
       ;; Dirty as fudge, but what can you do with Reagent?
       (.focus (.getElementById js/document id)))
     nil))
 
 (defn handle-selection-mode-key-down
-  [e rows cols ui-state]
+  [e rows cols state]
   (.preventDefault e)
   (let [keycode (.-keyCode e)
-        current-row (first (:selected @ui-state))
-        current-col (second (:selected @ui-state))
-        f (partial set-selected! ui-state)]
+        current-row (first (:selected @state))
+        current-col (second (:selected @state))
+        f (partial set-selected! state)]
     (condp = keycode
       37 (f current-row (max 0 (dec current-col)))
       38 (f (max 0 (dec current-row)) current-col)
       39 (f current-row (min (dec cols) (inc current-col)))
       40 (f (min (dec rows) (inc current-row)) current-col)
       9 (f current-row (min (dec cols) (inc current-col)))
-      13 (enable-edit-mode! ui-state current-row current-col)
+      13 (enable-edit-mode! state current-row current-col)
       nil)))
 
 (defn handle-key-down
-  [e rows cols ui-state id]
-  (if (:edit-mode @ui-state)
-    (handle-editing-mode-key-down e ui-state id)
-    (handle-selection-mode-key-down e rows cols ui-state)))
+  [e rows cols state id]
+  (if (:edit-mode @state)
+    (handle-editing-mode-key-down e state id)
+    (handle-selection-mode-key-down e rows cols state)))
 
 ;;
 ;; Components
 ;;
 
 (defn data-table-cell
-  [v nth-row nth-col ui-state]
-  (let [selected? (= (:selected @ui-state) [nth-row nth-col])
-        edit-mode? (:edit-mode @ui-state)]
+  [v nth-row nth-col state]
+  (let [selected? (= (:selected @state) [nth-row nth-col])
+        edit-mode? (:edit-mode @state)]
     [:td {:class (if selected? "selected")
-          :on-click #(set-selected! ui-state nth-row nth-col)}
+          :on-click #(set-selected! state nth-row nth-col)}
      (if (and selected? edit-mode?)
        [:input {:type "text"
                 :auto-focus true
@@ -66,12 +66,12 @@
        [:span v])]))
 
 (defn data-table-row
-  [headers row-data nth-row ui-state]
+  [headers row-data nth-row state]
   [:tr
    ;; TODO: run map-indexed to headers only once
    (for [[nth-col [k _]] (map-indexed vector headers)]
      ^{:key nth-col}
-     [data-table-cell (get row-data k) nth-row nth-col ui-state])])
+     [data-table-cell (get row-data k) nth-row nth-col state])])
 
 (defn data-table-headers
   [headers]
@@ -82,7 +82,7 @@
 
 (defn data-table
   [headers data]
-  (let [ui-state (reagent/atom {})
+  (let [state (reagent/atom {})
         id (gensym "reabledit-focusable")]
     (fn [headers data]
       [:div.reabledit
@@ -91,11 +91,11 @@
         :on-key-down #(handle-key-down %
                                        (count data)
                                        (count headers)
-                                       ui-state
+                                       state
                                        id)}
        [:table
         [data-table-headers headers]
         [:tbody
          (for [[nth-row row-data] (map-indexed vector data)]
            ^{:key nth-row}
-           [data-table-row headers row-data nth-row ui-state])]]])))
+           [data-table-row headers row-data nth-row state])]]])))
