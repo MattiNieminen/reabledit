@@ -28,26 +28,28 @@
     nil))
 
 (defn handle-selection-mode-key-down
-  [e rows cols state]
+  [e headers data state]
   (.preventDefault e)
   (let [keycode (.-keyCode e)
-        current-row (first (:selected @state))
-        current-col (second (:selected @state))
+        current-row (-> @state :selected first)
+        current-col (-> @state :selected second)
+        rows (-> data count dec)
+        cols (-> headers count dec)
         f (partial set-selected! state)]
     (condp = keycode
       37 (f current-row (max 0 (dec current-col)))
       38 (f (max 0 (dec current-row)) current-col)
-      39 (f current-row (min (dec cols) (inc current-col)))
-      40 (f (min (dec rows) (inc current-row)) current-col)
-      9 (f current-row (min (dec cols) (inc current-col)))
+      39 (f current-row (min cols (inc current-col)))
+      40 (f (min rows (inc current-row)) current-col)
+      9 (f current-row (min cols (inc current-col)))
       13 (enable-edit-mode! state current-row current-col)
       nil)))
 
 (defn handle-key-down
-  [e rows cols state id]
+  [e headers data state id]
   (if (:edit-mode @state)
     (handle-editing-mode-key-down e state id)
-    (handle-selection-mode-key-down e rows cols state)))
+    (handle-selection-mode-key-down e headers data state)))
 
 ;;
 ;; Components
@@ -88,11 +90,7 @@
       [:div.reabledit
        {:id id
         :tabIndex 0
-        :on-key-down #(handle-key-down %
-                                       (count data)
-                                       (count headers)
-                                       state
-                                       id)}
+        :on-key-down #(handle-key-down % headers data state id)}
        [:table
         [data-table-headers headers]
         [:tbody
