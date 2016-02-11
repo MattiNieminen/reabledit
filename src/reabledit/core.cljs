@@ -9,9 +9,11 @@
   [state row col]
   (swap! state assoc :selected [row col]))
 
-(defn enable-edit-mode!
-  [state row col]
-  (swap! state assoc :edit-mode true))
+(defn enable-edit!
+  [data state]
+  (let [row-data (nth data (first (:selected @state)))]
+    (swap! state assoc :edit {:initial row-data
+                              :updated row-data})))
 
 ;;
 ;; Keyboard event handlers
@@ -22,7 +24,7 @@
   (if (= 13 (.-keyCode e))
     (do
       (.preventDefault e)
-      (swap! state dissoc :edit-mode)
+      (swap! state dissoc :edit)
       ;; Dirty as fudge, but what can you do with Reagent?
       (.focus (.getElementById js/document id)))
     nil))
@@ -42,12 +44,12 @@
       39 (f current-row (min cols (inc current-col)))
       40 (f (min rows (inc current-row)) current-col)
       9 (f current-row (min cols (inc current-col)))
-      13 (enable-edit-mode! state current-row current-col)
+      13 (enable-edit! data state)
       nil)))
 
 (defn handle-key-down
   [e headers data state id]
-  (if (:edit-mode @state)
+  (if (:edit @state)
     (handle-editing-mode-key-down e state id)
     (handle-selection-mode-key-down e headers data state)))
 
@@ -58,10 +60,10 @@
 (defn data-table-cell
   [v nth-row nth-col state]
   (let [selected? (= (:selected @state) [nth-row nth-col])
-        edit-mode? (:edit-mode @state)]
+        edit? (:edit @state)]
     [:td {:class (if selected? "selected")
           :on-click #(set-selected! state nth-row nth-col)}
-     (if (and selected? edit-mode?)
+     (if (and selected? edit?)
        [:input {:type "text"
                 :auto-focus true
                 :value v}]
