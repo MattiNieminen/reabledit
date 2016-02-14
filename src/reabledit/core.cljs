@@ -41,7 +41,7 @@
         rows (-> data count dec)
         cols (-> headers count dec)
         f (partial set-selected! state)]
-    (condp = keycode
+    (case keycode
       37 (f current-row (max 0 (dec current-col)))
       38 (f (max 0 (dec current-row)) current-col)
       39 (f current-row (min cols (inc current-col)))
