@@ -100,7 +100,7 @@
   [headers data row-change-fn]
   (let [state (reagent/atom {})
         id (gensym "reabledit-focusable")]
-    (fn [headers data]
+    (fn [headers data row-change-fn]
       [:div.reabledit
        {:id id
         :tabIndex 0
