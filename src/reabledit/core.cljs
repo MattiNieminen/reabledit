@@ -24,7 +24,8 @@
   (if (= 13 (.-keyCode e))
     (do
       (.preventDefault e)
-      (row-change-fn (get-in @state [:edit :initial])
+      (row-change-fn (first (:selected @state))
+                     (get-in @state [:edit :initial])
                      (get-in @state [:edit :updated]))
       (swap! state dissoc :edit)
       ;; Dirty as fudge, but what can you do with Reagent?

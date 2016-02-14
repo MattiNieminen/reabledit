@@ -1,6 +1,7 @@
 (ns devdemos.core
   (:require [reagent.core :as reagent]
-            [reabledit.core :as reabledit])
+            [reabledit.core :as reabledit]
+            [reabledit.util :as reable-util])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (def example-headers
@@ -20,14 +21,17 @@
     :age "24"
     :owner "Clark Kent"}])
 
+(defonce example-atom (reagent/atom example-data))
+
 (defn example-row-fn
-  [old-row new-row]
-  (js/alert (str "Row "
-                 (pr-str old-row)
-                 " was changed into "
-                 (pr-str new-row))))
+  [nth-row old-row new-row]
+  (swap! example-atom reable-util/update-row nth-row new-row))
+
+(defn data-table*
+  [data-atom]
+  [reabledit/data-table example-headers @data-atom example-row-fn])
 
 (defcard-rg reabledit
   (fn [data-atom _]
-    [reabledit/data-table example-headers @data-atom example-row-fn])
-  (reagent/atom example-data))
+    [data-table* data-atom])
+  example-atom)
