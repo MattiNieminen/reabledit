@@ -2,23 +2,43 @@
   (:require [reabledit.util :as util]
             [reagent.core :as reagent]))
 
-(defn data-table-cell-input
+;;
+;; Cell editors
+;;
+
+(defn string-editor
   [cursor]
   [:input {:type "text"
            :auto-focus true
            :value @cursor
            :on-change #(reset! cursor (-> % .-target .-value))}])
 
+(defn int-editor
+  [cursor]
+  [:input {:type "text"
+           :auto-focus true
+           :value @cursor
+           :on-change (fn [e]
+                        (let [new-value (js/parseInt (-> e .-target .-value))
+                              int? (not (js/isNaN new-value))]
+                          (if int?
+                            (reset! cursor new-value))))}])
+
+;;
+;; Dependencies for the main component
+;;
+
 (defn data-table-cell
   [columns data v nth-row nth-col state]
   (let [selected? (= (:selected @state) [nth-row nth-col])
         edit? (:edit @state)
-        key (:key (nth columns nth-col))
-        cursor (reagent/cursor state [:edit :updated key])]
+        column (nth columns nth-col)
+        cursor (reagent/cursor state [:edit :updated (:key column)])
+        editor (or (:editor column) string-editor)]
     [:td {:class (if selected? "selected")
           :on-click #(util/set-selected! state nth-row nth-col)}
      (if (and selected? edit?)
-       [data-table-cell-input cursor]
+       [editor cursor]
        [:span v])]))
 
 (defn data-table-row

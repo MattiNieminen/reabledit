@@ -1,13 +1,15 @@
 (ns devdemos.core
   (:require [reagent.core :as reagent]
-            [reabledit.core :as reabledit])
+            [reabledit.core :as reabledit]
+            [reabledit.components :as components])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (def example-columns
   [{:key :name
     :value "Name"}
    {:key :age
-    :value "Age"}
+    :value "Age"
+    :editor components/int-editor}
    {:key :owner
     :value "Owner"}])
 
@@ -39,4 +41,5 @@
 (defcard-rg reabledit
   (fn [data-atom _]
     [data-table* data-atom])
-  example-atom)
+  example-atom
+  {:inspect-data true})
