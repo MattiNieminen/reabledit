@@ -1,25 +1,24 @@
 (ns reabledit.components
-  (:require [reabledit.util :as util]))
+  (:require [reabledit.util :as util]
+            [reagent.core :as reagent]))
 
 (defn data-table-cell-input
-  [columns data nth-row nth-col state]
-  (let [k (:key (nth columns nth-col))]
-    [:input {:type "text"
-             :auto-focus true
-             :value (get (get-in @state [:edit :updated]) k)
-             :on-change #(swap! state
-                                assoc-in
-                                [:edit :updated k]
-                                (-> % .-target .-value))}]))
+  [cursor]
+  [:input {:type "text"
+           :auto-focus true
+           :value @cursor
+           :on-change #(reset! cursor (-> % .-target .-value))}])
 
 (defn data-table-cell
   [columns data v nth-row nth-col state]
   (let [selected? (= (:selected @state) [nth-row nth-col])
-        edit? (:edit @state)]
+        edit? (:edit @state)
+        key (:key (nth columns nth-col))
+        cursor (reagent/cursor state [:edit :updated key])]
     [:td {:class (if selected? "selected")
           :on-click #(util/set-selected! state nth-row nth-col)}
      (if (and selected? edit?)
-       [data-table-cell-input columns data nth-row nth-col state]
+       [data-table-cell-input cursor]
        [:span v])]))
 
 (defn data-table-row
