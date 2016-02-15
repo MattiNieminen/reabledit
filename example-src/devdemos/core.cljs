@@ -4,8 +4,14 @@
             [reabledit.util :as reable-util])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
-(def example-headers
-  [[:name "Name"] [:age "Age"] [:owner "Owner"]])
+(def example-columns
+  [{:key :name
+    :value "Name"}
+   {:key :age
+    :value "Age"}
+   {:key :owner
+    :value "Owner"}])
+
 
 (def example-data
   [{:id 1
@@ -29,7 +35,7 @@
 
 (defn data-table*
   [data-atom]
-  [reabledit/data-table example-headers @data-atom example-row-fn])
+  [reabledit/data-table example-columns @data-atom example-row-fn])
 
 (defcard-rg reabledit
   (fn [data-atom _]

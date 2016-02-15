@@ -33,13 +33,13 @@
     nil))
 
 (defn handle-selection-mode-key-down
-  [e headers data state]
+  [e columns data state]
   (.preventDefault e)
   (let [keycode (.-keyCode e)
         current-row (-> @state :selected first)
         current-col (-> @state :selected second)
         rows (-> data count dec)
-        cols (-> headers count dec)
+        cols (-> columns count dec)
         f (partial set-selected! state)]
     (case keycode
       37 (f current-row (max 0 (dec current-col)))
@@ -51,18 +51,18 @@
       nil)))
 
 (defn handle-key-down
-  [e headers data state row-change-fn id]
+  [e columns data state row-change-fn id]
   (if (:edit @state)
     (handle-editing-mode-key-down e state row-change-fn id)
-    (handle-selection-mode-key-down e headers data state)))
+    (handle-selection-mode-key-down e columns data state)))
 
 ;;
 ;; Components
 ;;
 
 (defn data-table-cell-input
-  [headers data nth-row nth-col state]
-  (let [k (first (nth headers nth-col))]
+  [columns data nth-row nth-col state]
+  (let [k (:key (nth columns nth-col))]
     [:input {:type "text"
              :auto-focus true
              :value (get (get-in @state [:edit :updated]) k)
@@ -72,42 +72,42 @@
                                 (-> % .-target .-value))}]))
 
 (defn data-table-cell
-  [headers data v nth-row nth-col state]
+  [columns data v nth-row nth-col state]
   (let [selected? (= (:selected @state) [nth-row nth-col])
         edit? (:edit @state)]
     [:td {:class (if selected? "selected")
           :on-click #(set-selected! state nth-row nth-col)}
      (if (and selected? edit?)
-       [data-table-cell-input headers data nth-row nth-col state]
+       [data-table-cell-input columns data nth-row nth-col state]
        [:span v])]))
 
 (defn data-table-row
-  [headers data row-data nth-row state]
+  [columns data row-data nth-row state]
   [:tr
-   ;; TODO: run map-indexed to headers only once
-   (for [[nth-col [k _]] (map-indexed vector headers)]
+   ;; TODO: run map-indexed to columns only once
+   (for [[nth-col {:keys [key value]}] (map-indexed vector columns)]
      ^{:key nth-col}
-     [data-table-cell headers data (get row-data k) nth-row nth-col state])])
+     [data-table-cell columns data (get row-data key) nth-row nth-col state])])
 
 (defn data-table-headers
-  [headers]
+  [columns]
   [:thead
    [:tr
-    (for [[k localized] headers]
-      ^{:key k} [:th localized])]])
+    (for [{:keys [key value]} columns]
+      ^{:key key} [:th value])]])
 
 (defn data-table
-  [headers data row-change-fn]
+  [columns data row-change-fn]
   (let [state (reagent/atom {})
         id (gensym "reabledit-focusable")]
-    (fn [headers data row-change-fn]
+    (fn [columns data row-change-fn]
       [:div.reabledit
        {:id id
         :tabIndex 0
-        :on-key-down #(handle-key-down % headers data state row-change-fn id)}
+        :on-key-down #(handle-key-down % columns data state row-change-fn id)}
        [:table
-        [data-table-headers headers]
+        [data-table-headers columns]
         [:tbody
          (for [[nth-row row-data] (map-indexed vector data)]
            ^{:key nth-row}
-           [data-table-row headers data row-data nth-row state])]]])))
+           [data-table-row columns data row-data nth-row state])]]])))
