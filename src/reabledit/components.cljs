@@ -10,6 +10,7 @@
   [cursor]
   [:input {:type "text"
            :auto-focus true
+           :on-focus util/move-cursor-to-end!
            :value @cursor
            :on-change #(reset! cursor (-> % .-target .-value))}])
 
@@ -17,6 +18,7 @@
   [cursor]
   [:input {:type "text"
            :auto-focus true
+           :on-focus util/move-cursor-to-end!
            :value @cursor
            :on-change (fn [e]
                         (let [new-value (js/parseInt (-> e .-target .-value))

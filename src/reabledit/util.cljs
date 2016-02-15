@@ -10,3 +10,10 @@
     (let [row-data (nth data (first (:selected @state)))]
       (swap! state assoc :edit {:initial row-data
                                 :updated row-data}))))
+
+(defn move-cursor-to-end!
+  [e]
+  (let [el (.-target e)
+        length (count (.-value el))]
+    (set! (.-selectionStart el) length)
+    (set! (.-selectionEnd el) length)))
