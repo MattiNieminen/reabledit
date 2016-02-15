@@ -29,7 +29,7 @@
       39 (f current-row (min cols (inc current-col)))
       40 (f (min rows (inc current-row)) current-col)
       9 (f current-row (min cols (inc current-col)))
-      13 (util/enable-edit! data state)
+      13 (util/enable-edit! columns data state)
       nil)))
 
 (defn handle-key-down

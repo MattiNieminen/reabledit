@@ -5,7 +5,10 @@
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (def example-columns
-  [{:key :name
+  [{:key :id
+    :name "ID"
+    :disable-edit true}
+   {:key :name
     :value "Name"}
    {:key :age
     :value "Age"

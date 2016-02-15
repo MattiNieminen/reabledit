@@ -5,7 +5,8 @@
   (swap! state assoc :selected [row col]))
 
 (defn enable-edit!
-  [data state]
-  (let [row-data (nth data (first (:selected @state)))]
-    (swap! state assoc :edit {:initial row-data
-                              :updated row-data})))
+  [columns data state]
+  (if-not (:disable-edit (nth columns (second (:selected @state))))
+    (let [row-data (nth data (first (:selected @state)))]
+      (swap! state assoc :edit {:initial row-data
+                                :updated row-data}))))
