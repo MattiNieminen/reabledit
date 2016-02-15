@@ -1,4 +1,5 @@
-(ns reabledit.keyboard)
+(ns reabledit.keyboard
+  (:require [reabledit.util :as util]))
 
 (defn handle-editing-mode-key-down
   [e state row-change-fn id]
@@ -21,14 +22,14 @@
         current-col (-> @state :selected second)
         rows (-> data count dec)
         cols (-> columns count dec)
-        f (partial set-selected! state)]
+        f (partial util/set-selected! state)]
     (case keycode
       37 (f current-row (max 0 (dec current-col)))
       38 (f (max 0 (dec current-row)) current-col)
       39 (f current-row (min cols (inc current-col)))
       40 (f (min rows (inc current-row)) current-col)
       9 (f current-row (min cols (inc current-col)))
-      13 (enable-edit! data state)
+      13 (util/enable-edit! data state)
       nil)))
 
 (defn handle-key-down

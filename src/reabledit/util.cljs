@@ -1,6 +1,11 @@
 (ns reabledit.util)
 
-(defn update-row
-  [data nth-row new-row]
-  (let [[init tail] (split-at nth-row data)]
-    (into [] (concat init [new-row] (rest tail)))))
+(defn set-selected!
+  [state row col]
+  (swap! state assoc :selected [row col]))
+
+(defn enable-edit!
+  [data state]
+  (let [row-data (nth data (first (:selected @state)))]
+    (swap! state assoc :edit {:initial row-data
+                              :updated row-data})))

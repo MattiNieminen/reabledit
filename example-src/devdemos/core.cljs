@@ -1,7 +1,6 @@
 (ns devdemos.core
   (:require [reagent.core :as reagent]
-            [reabledit.core :as reabledit]
-            [reabledit.util :as reable-util])
+            [reabledit.core :as reabledit])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (def example-columns
@@ -31,7 +30,7 @@
 
 (defn example-row-fn
   [nth-row old-row new-row]
-  (swap! example-atom reable-util/update-row nth-row new-row))
+  (swap! example-atom reabledit/update-row nth-row new-row))
 
 (defn data-table*
   [data-atom]

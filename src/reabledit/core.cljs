@@ -1,20 +1,17 @@
 (ns reabledit.core
-  (:require [reabledit.keyboard :as keyboard]
+  (:require [reabledit.util :as util]
+            [reabledit.keyboard :as keyboard]
             [reagent.core :as reagent]))
 
 ;;
-;; State-related helpers
+;; Convenience API
 ;;
 
-(defn set-selected!
-  [state row col]
-  (swap! state assoc :selected [row col]))
+(defn update-row
+  [data nth-row new-row]
+  (let [[init tail] (split-at nth-row data)]
+    (into [] (concat init [new-row] (rest tail)))))
 
-(defn enable-edit!
-  [data state]
-  (let [row-data (nth data (first (:selected @state)))]
-    (swap! state assoc :edit {:initial row-data
-                              :updated row-data})))
 
 ;;
 ;; Components
@@ -36,7 +33,7 @@
   (let [selected? (= (:selected @state) [nth-row nth-col])
         edit? (:edit @state)]
     [:td {:class (if selected? "selected")
-          :on-click #(set-selected! state nth-row nth-col)}
+          :on-click #(util/set-selected! state nth-row nth-col)}
      (if (and selected? edit?)
        [data-table-cell-input columns data nth-row nth-col state]
        [:span v])]))
