@@ -36,7 +36,7 @@
         (util/disable-edit! state element-id))
 
       ;; Arrow keys in navigation mode change the selection
-      ;; Enter in navigation mode enables editing mode
+      ;; Enter and F2 in navigation mode enables editing mode
       (nil? (:edit @state))
       (do
         (.preventDefault e)
@@ -47,4 +47,5 @@
           40 (f (min rows (inc current-row)) current-col)
           9 (f current-row (min cols (inc current-col)))
           13 (util/enable-edit! columns data state)
+          113 (util/enable-edit! columns data state)
           nil)))))
