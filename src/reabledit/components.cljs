@@ -54,7 +54,7 @@
           :on-click #(util/set-selected! state nth-row nth-col)}
      (if (and selected? edit?)
        [editor cursor]
-       [:span v])]))
+       [view v])]))
 
 (defn data-table-row
   [columns data row-data nth-row state]
