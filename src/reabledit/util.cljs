@@ -11,6 +11,13 @@
       (swap! state assoc :edit {:initial row-data
                                 :updated row-data}))))
 
+(defn disable-edit!
+  [state element-id]
+  (swap! state dissoc :edit)
+
+  ;; Dirty as fudge, but what can you do with Reagent?
+  (.focus (.getElementById js/document element-id)))
+
 (defn move-cursor-to-end!
   [e]
   (let [el (.-target e)

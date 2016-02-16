@@ -20,17 +20,17 @@
 (defn data-table
   [columns data row-change-fn]
   (let [state (reagent/atom {})
-        id (gensym "reabledit-focusable")]
+        element-id (gensym "reabledit-focusable")]
     (fn [columns data row-change-fn]
       [:div.reabledit
-       {:id id
+       {:id element-id
         :tabIndex 0
         :on-key-down #(keyboard/handle-key-down %
                                                 columns
                                                 data
                                                 state
                                                 row-change-fn
-                                                id)}
+                                                element-id)}
        [:table
         [components/data-table-headers columns]
         [:tbody
