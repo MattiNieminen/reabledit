@@ -11,6 +11,13 @@
   (fn [v]
     [:span v]))
 
+(defn dropdown-view
+  [options]
+  (fn [v]
+    [:span (-> (filter #(= (:key %) v) options)
+               first
+               :value)]))
+
 
 ;;
 ;; Cell editors

@@ -4,6 +4,12 @@
             [reabledit.components :as components])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
+(def example-options
+  [{:key :marvel
+    :value "Marvel"}
+   {:key :dc
+    :value "DC Comics"}])
+
 (def example-columns
   [{:key :id
     :value "ID"
@@ -12,18 +18,24 @@
     :value "Name"}
    {:key :age
     :value "Age"
-    :editor (components/int-editor)}])
+    :editor (components/int-editor)}
+   {:key :publisher
+    :value "Publisher"
+    :view (components/dropdown-view example-options)}])
 
 (def example-data
   [{:id 1
     :name "Deadpool"
-    :age 32}
+    :age 32
+    :publisher :marvel}
    {:id 2
     :name "Supergirl"
-    :age 27}
+    :age 27
+    :publisher :dc}
    {:id 3
     :name "Dr. Strange"
-    :age "43"}])
+    :age "43"
+    :publisher :marvel}])
 
 (defonce example-atom (reagent/atom example-data))
 
