@@ -2,6 +2,7 @@
 
 (defn set-selected!
   [state row col]
+  (swap! state dissoc :edit)
   (swap! state assoc :selected [row col]))
 
 (defn enable-edit!
