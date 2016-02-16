@@ -7,24 +7,26 @@
 ;;
 
 (defn string-editor
-  [cursor]
-  [:input {:type "text"
-           :auto-focus true
-           :on-focus util/move-cursor-to-end!
-           :value @cursor
-           :on-change #(reset! cursor (-> % .-target .-value))}])
+  []
+  (fn [cursor]
+    [:input {:type "text"
+             :auto-focus true
+             :on-focus util/move-cursor-to-end!
+             :value @cursor
+             :on-change #(reset! cursor (-> % .-target .-value))}]))
 
 (defn int-editor
-  [cursor]
-  [:input {:type "text"
-           :auto-focus true
-           :on-focus util/move-cursor-to-end!
-           :value @cursor
-           :on-change (fn [e]
-                        (let [new-value (js/parseInt (-> e .-target .-value))
-                              int? (not (js/isNaN new-value))]
-                          (if int?
-                            (reset! cursor new-value))))}])
+  []
+  (fn [cursor]
+    [:input {:type "text"
+             :auto-focus true
+             :on-focus util/move-cursor-to-end!
+             :value @cursor
+             :on-change (fn [e]
+                          (let [new-value (js/parseInt (-> e .-target .-value))
+                                int? (not (js/isNaN new-value))]
+                            (if int?
+                              (reset! cursor new-value))))}]))
 
 ;;
 ;; Dependencies for the main component
@@ -36,7 +38,7 @@
         edit? (:edit @state)
         column (nth columns nth-col)
         cursor (reagent/cursor state [:edit :updated (:key column)])
-        editor (or (:editor column) string-editor)]
+        editor (or (:editor column) (string-editor))]
     [:td {:class (if selected? "selected")
           :on-click #(util/set-selected! state nth-row nth-col)}
      (if (and selected? edit?)

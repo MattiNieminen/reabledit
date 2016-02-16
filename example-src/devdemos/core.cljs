@@ -12,7 +12,7 @@
     :value "Name"}
    {:key :age
     :value "Age"
-    :editor components/int-editor}])
+    :editor (components/int-editor)}])
 
 (def example-data
   [{:id 1
