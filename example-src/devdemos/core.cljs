@@ -6,7 +6,7 @@
 
 (def example-columns
   [{:key :id
-    :name "ID"
+    :value "ID"
     :disable-edit true}
    {:key :name
     :value "Name"}
@@ -15,7 +15,6 @@
     :editor components/int-editor}
    {:key :owner
     :value "Owner"}])
-
 
 (def example-data
   [{:id 1
