@@ -1,6 +1,7 @@
 (ns reabledit.core
   (:require [reabledit.components :as components]
             [reabledit.keyboard :as keyboard]
+            [reabledit.util :as util]
             [reagent.core :as reagent]))
 
 ;;
@@ -30,7 +31,8 @@
                                                 data
                                                 state
                                                 row-change-fn
-                                                element-id)}
+                                                element-id)
+        :on-double-click #(util/enable-edit! columns data state)}
        [:table
         [components/data-table-headers columns]
         [:tbody
