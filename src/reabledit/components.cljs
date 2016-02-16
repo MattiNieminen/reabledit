@@ -3,6 +3,16 @@
             [reagent.core :as reagent]))
 
 ;;
+;; Cell views
+;;
+
+(defn span-view
+  []
+  (fn [v]
+    [:span v]))
+
+
+;;
 ;; Cell editors
 ;;
 
@@ -38,6 +48,7 @@
         edit? (:edit @state)
         column (nth columns nth-col)
         cursor (reagent/cursor state [:edit :updated (:key column)])
+        view (or (:view column) (span-view))
         editor (or (:editor column) (string-editor))]
     [:td {:class (if selected? "selected")
           :on-click #(util/set-selected! state nth-row nth-col)}
