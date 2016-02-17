@@ -57,15 +57,15 @@
         cursor (reagent/cursor state [:edit :updated (:key column)])
         view (or (:view column) (span-view))
         editor (or (:editor column) (string-editor))]
-    [:td {:class (if selected? "selected")
-          :on-click #(util/set-selected! state nth-row nth-col)}
+    [:div.reabledit-cell {:class (if selected? "selected")
+                          :on-click #(util/set-selected! state nth-row nth-col)}
      (if (and selected? edit?)
        [editor cursor]
        [view v])]))
 
 (defn data-table-row
   [columns data row-data nth-row state]
-  [:tr
+  [:div.reabledit-row
    ;; TODO: run map-indexed to columns only once
    (for [[nth-col {:keys [key value]}] (map-indexed vector columns)]
      ^{:key nth-col}
@@ -73,7 +73,6 @@
 
 (defn data-table-headers
   [columns]
-  [:thead
-   [:tr
-    (for [{:keys [key value]} columns]
-      ^{:key key} [:th value])]])
+  [:div.reabledit-row
+   (for [{:keys [key value]} columns]
+     ^{:key key} [:div.reabledit-cell.reabledit-header value])])

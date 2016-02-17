@@ -33,9 +33,7 @@
                                                 row-change-fn
                                                 element-id)
         :on-double-click #(util/enable-edit! columns data state)}
-       [:table
-        [components/data-table-headers columns]
-        [:tbody
-         (for [[nth-row row-data] (map-indexed vector data)]
-           ^{:key nth-row}
-           [components/data-table-row columns data row-data nth-row state])]]])))
+       [components/data-table-headers columns]
+       (for [[nth-row row-data] (map-indexed vector data)]
+         ^{:key nth-row}
+         [components/data-table-row columns data row-data nth-row state])])))

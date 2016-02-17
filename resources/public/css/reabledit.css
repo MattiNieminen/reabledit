@@ -1,36 +1,44 @@
+.reabledit {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  border: 2px solid #ddd;
+}
+
 .reabledit:focus {
   outline: none;
 }
 
-.reabledit table {
-  width: 100%;
-  border: 2px solid #ddd;
-  border-collapse: collapse;
+.reabledit-row {
+  display: flex;
 }
 
-.reabledit th, .reabledit td {
+.reabledit-header {
+  background-color: #f3f3f3;
+  font-weight: bold;
+}
+
+.reabledit-cell {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
   border: 1px solid #ddd;
-  padding: 0;
-  box-sizing: border-box;
   height: 40px;
 }
 
-.reabledit th {
-  background-color: #f3f3f3;
-}
-
-.reabledit td.selected {
+.reabledit-cell.selected {
   background-color: #f9f9f9;
-  border: 2px solid #4ca2d8;
+  border: 1px solid #4ca2d8;
 }
 
-.reabledit td span {
+.reabledit-cell span {
   padding-left: 7px;
 }
 
-.reabledit td input {
+.reabledit-cell input {
   width: 100%;
   height: 100%;
+  padding-left: 6px;
+  font-size: 95%;
   box-sizing: border-box;
-  font-size: 100%;
 }
