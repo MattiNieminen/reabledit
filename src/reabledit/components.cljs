@@ -45,6 +45,45 @@
                             (if int?
                               (reset! cursor new-value))))}]))
 
+(defn- dropdown-editor-on-key-down
+  [e cursor options]
+  (let [keycode (.-keyCode e)
+        position (first (keep-indexed #(if (= %2 @cursor) %1)
+                                      (map :key options)))]
+    (case keycode
+      38 (do
+           (.preventDefault e)
+           (if (zero? position)
+             (reset! cursor (-> options last :key))
+             (reset! cursor (:key (nth options (dec position))))))
+      40 (do
+           (.preventDefault e)
+           (if (= position (-> options count dec))
+             (reset! cursor (-> options first :key))
+             (reset! cursor (:key (nth options (inc position))))))
+      nil)))
+
+(defn dropdown-editor
+  [options]
+  (with-meta
+    (fn [cursor]
+      (let [chosen-key @cursor]
+        [:div.reabledit-dropdown
+         {:tabIndex 0
+          :on-key-down #(dropdown-editor-on-key-down % cursor options)}
+         [:span (-> (filter #(= (:key %) chosen-key) options)
+                    first
+                    :value)]
+         [:div.reabledit-dropdown-items
+          (for [{:keys [key value]} options]
+            ^{:key key}
+            [:div.reabledit-dropdown-item
+             {:class (if (= key chosen-key) "selected")}
+             [:span value]])]]))
+    {:component-did-mount
+     (fn [this]
+       (.focus (reagent/dom-node this)))}))
+
 ;;
 ;; Dependencies for the main component
 ;;

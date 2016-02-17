@@ -42,3 +42,31 @@
   font-size: 95%;
   box-sizing: border-box;
 }
+
+.reabledit-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.reabledit-dropdown:focus {
+  outline: none;
+}
+
+.reabledit-dropdown-items {
+  position: absolute;
+  margin-top: 10px;
+  background-color: #fff;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  width: 100%;
+}
+
+.reabledit-dropdown-item {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.reabledit-dropdown-item.selected {
+    background-color: #4ca2d8;
+    color: #fff;
+}

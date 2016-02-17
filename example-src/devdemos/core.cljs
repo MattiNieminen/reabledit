@@ -5,7 +5,9 @@
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (def example-options
-  [{:key :marvel
+  [{:key :unknown
+    :value "Unknown"}
+   {:key :marvel
     :value "Marvel"}
    {:key :dc
     :value "DC Comics"}])
@@ -21,7 +23,8 @@
     :editor (components/int-editor)}
    {:key :publisher
     :value "Publisher"
-    :view (components/dropdown-view example-options)}])
+    :view (components/dropdown-view example-options)
+    :editor (components/dropdown-editor example-options)}])
 
 (def example-data
   [{:id 1
