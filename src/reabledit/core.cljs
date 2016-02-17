@@ -46,4 +46,6 @@
             row-data
             nth-row
             state
+            enable-edit!
+            disable-edit!
             set-selected!])]))))

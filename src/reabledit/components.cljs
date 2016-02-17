@@ -8,12 +8,12 @@
 
 (defn span-view
   []
-  (fn [v]
+  (fn [v _]
     [:span v]))
 
 (defn dropdown-view
   [options]
-  (fn [v]
+  (fn [v _]
     [:span (-> (filter #(= (:key %) v) options)
                first
                :value)]))
@@ -25,7 +25,7 @@
 
 (defn string-editor
   []
-  (fn [cursor]
+  (fn [cursor _]
     [:input {:type "text"
              :auto-focus true
              :on-focus util/move-cursor-to-end!
@@ -34,7 +34,7 @@
 
 (defn int-editor
   []
-  (fn [cursor]
+  (fn [cursor _]
     [:input {:type "text"
              :auto-focus true
              :on-focus util/move-cursor-to-end!
@@ -66,7 +66,7 @@
 (defn dropdown-editor
   [options]
   (with-meta
-    (fn [cursor]
+    (fn [cursor disable-edit!]
       (let [chosen-key @cursor]
         [:div.reabledit-dropdown
          {:tabIndex 0
@@ -89,7 +89,8 @@
 ;;
 
 (defn data-table-cell
-  [columns data v nth-row nth-col state set-selected!]
+  [columns data v nth-row nth-col state
+   enable-edit! disable-edit! set-selected!]
   (let [selected? (= (:selected @state) [nth-row nth-col])
         edit? (:edit @state)
         column (nth columns nth-col)
@@ -99,11 +100,12 @@
     [:div.reabledit-cell {:class (if selected? "selected")
                           :on-click #(set-selected! nth-row nth-col)}
      (if (and selected? edit?)
-       [editor cursor]
-       [view v])]))
+       [editor cursor disable-edit!]
+       [view v enable-edit!])]))
 
 (defn data-table-row
-  [columns data row-data nth-row state set-selected!]
+  [columns data row-data nth-row state
+   enable-edit! disable-edit! set-selected!]
   [:div.reabledit-row
    ;; TODO: run map-indexed to columns only once
    (for [[nth-col {:keys [key value]}] (map-indexed vector columns)]
@@ -115,6 +117,8 @@
       nth-row
       nth-col
       state
+      enable-edit!
+      disable-edit!
       set-selected!])])
 
 (defn data-table-headers
