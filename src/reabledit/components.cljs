@@ -89,7 +89,7 @@
 ;;
 
 (defn data-table-cell
-  [columns data v nth-row nth-col state]
+  [columns data v nth-row nth-col state set-selected!]
   (let [selected? (= (:selected @state) [nth-row nth-col])
         edit? (:edit @state)
         column (nth columns nth-col)
@@ -97,18 +97,25 @@
         view (or (:view column) (span-view))
         editor (or (:editor column) (string-editor))]
     [:div.reabledit-cell {:class (if selected? "selected")
-                          :on-click #(util/set-selected! state nth-row nth-col)}
+                          :on-click #(set-selected! nth-row nth-col)}
      (if (and selected? edit?)
        [editor cursor]
        [view v])]))
 
 (defn data-table-row
-  [columns data row-data nth-row state]
+  [columns data row-data nth-row state set-selected!]
   [:div.reabledit-row
    ;; TODO: run map-indexed to columns only once
    (for [[nth-col {:keys [key value]}] (map-indexed vector columns)]
      ^{:key nth-col}
-     [data-table-cell columns data (get row-data key) nth-row nth-col state])])
+     [data-table-cell
+      columns
+      data
+      (get row-data key)
+      nth-row
+      nth-col
+      state
+      set-selected!])])
 
 (defn data-table-headers
   [columns]
