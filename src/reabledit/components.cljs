@@ -78,7 +78,11 @@
           (for [{:keys [key value]} options]
             ^{:key key}
             [:div.reabledit-dropdown-item
-             {:class (if (= key chosen-key) "selected")}
+             {:class (if (= key chosen-key) "selected")
+              :on-click (fn [e]
+                          (.stopPropagation e)
+                          (reset! cursor key)
+                          (disable-edit!))}
              [:span value]])]]))
     {:component-did-mount
      (fn [this]
