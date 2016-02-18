@@ -23,6 +23,7 @@
   display: flex;
   flex: 1 1 0;
   align-items: center;
+  background-color: #fff;
   border: 1px solid #ddd;
   height: 40px;
 }
