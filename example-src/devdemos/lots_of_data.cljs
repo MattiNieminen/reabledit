@@ -11,7 +11,9 @@
 
 (defn generate-row
   []
-  (reduce #(assoc %1 %2 (str (gensym))) {} example-keys))
+  (reduce
+   #(assoc %1 %2 (str (gensym "Some really long, long prefix")))
+   {} example-keys))
 
 (def example-columns (mapv #(assoc {} :key % :value (str %)) example-keys))
 (def example-data (mapv generate-row (range 1 50)))
