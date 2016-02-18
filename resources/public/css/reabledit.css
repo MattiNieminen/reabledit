@@ -2,7 +2,6 @@
   display: flex;
   flex-flow: column nowrap;
   border: 2px solid #ddd;
-  overflow: auto;
 }
 
 .reabledit:focus {
