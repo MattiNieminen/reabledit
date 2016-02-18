@@ -13,7 +13,7 @@
    [{:id "devcards"
      :source-paths ["example-src" "src"]
      :figwheel {:devcards true}
-     :compiler {:main "devdemos.core"
+     :compiler {:main "devdemos.devcards"
                 :asset-path "js/compiled/devcards_out"
                 :output-to "example-resources/public/js/compiled/reabledit_devcards.js"
                 :output-dir "example-resources/public/js/compiled/devcards_out"
