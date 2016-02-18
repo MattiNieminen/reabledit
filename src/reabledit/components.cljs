@@ -1,6 +1,7 @@
 (ns reabledit.components
   (:require [reabledit.util :as util]
-            [reagent.core :as reagent]))
+            [reagent.core :as reagent]
+            [reagent.ratom :refer-macros [reaction]]))
 
 ;;
 ;; Cell views
@@ -95,17 +96,19 @@
 (defn data-table-cell
   [columns data v nth-row nth-col state
    enable-edit! disable-edit! set-selected!]
-  (let [selected? (= (:selected @state) [nth-row nth-col])
-        edit? (:edit @state)
-        column (nth columns nth-col)
-        cursor (reagent/cursor state [:edit :updated (:key column)])
-        view (or (:view column) (span-view))
-        editor (or (:editor column) (string-editor))]
-    [:div.reabledit-cell {:class (if selected? "selected")
-                          :on-click #(set-selected! nth-row nth-col)}
-     (if (and selected? edit?)
-       [editor cursor disable-edit!]
-       [view v enable-edit!])]))
+  (let [selected? (reaction (= (:selected @state) [nth-row nth-col]))
+        edit? (reaction (:edit @state))]
+    (fn [columns data v nth-row nth-col state
+         enable-edit! disable-edit! set-selected!]
+      (let [column (nth columns nth-col)
+            cursor (reagent/cursor state [:edit :updated (:key column)])
+            view (or (:view column) (span-view))
+            editor (or (:editor column) (string-editor))]
+        [:div.reabledit-cell {:class (if @selected? "selected")
+                              :on-click #(set-selected! nth-row nth-col)}
+         (if (and @selected? @edit?)
+           [editor cursor disable-edit!]
+           [view v enable-edit!])]))))
 
 (defn data-table-row
   [columns data row-data nth-row state
