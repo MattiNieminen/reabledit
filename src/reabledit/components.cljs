@@ -129,4 +129,6 @@
   [columns]
   [:div.reabledit-row
    (for [{:keys [key value]} columns]
-     ^{:key key} [:div.reabledit-cell.reabledit-header value])])
+     ^{:key key}
+     [:div.reabledit-cell.reabledit-header
+      [:span value]])])

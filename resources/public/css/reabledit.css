@@ -1,8 +1,8 @@
 .reabledit {
   display: flex;
   flex-flow: column nowrap;
-  justify-content: space-between;
   border: 2px solid #ddd;
+  overflow: auto;
 }
 
 .reabledit:focus {
@@ -16,12 +16,12 @@
 .reabledit-header {
   background-color: #f3f3f3 !important;
   font-weight: bold;
-  padding-left: 6px;
 }
 
 .reabledit-cell {
   display: flex;
   flex: 1 1 0;
+  min-width: 100px;
   align-items: center;
   background-color: #fff;
   border: 1px solid #ddd;
