@@ -93,11 +93,11 @@
 ;;
 
 (defn data-table-cell
-  [columns data v nth-row nth-col state
+  [columns v nth-row nth-col state
    enable-edit! disable-edit! set-selected!]
   (let [selected? (reaction (= (:selected @state) [nth-row nth-col]))
         edit? (reaction (:edit @state))]
-    (fn [columns data v nth-row nth-col state
+    (fn [columns v nth-row nth-col state
          enable-edit! disable-edit! set-selected!]
       (let [column (nth columns nth-col)
             view (or (:view column) (span-view))
@@ -112,7 +112,7 @@
            [view v enable-edit!])]))))
 
 (defn data-table-row
-  [columns data row-data nth-row state
+  [columns row-data nth-row state
    enable-edit! disable-edit! set-selected!]
   [:div.reabledit-row
    ;; TODO: run map-indexed to columns only once
@@ -120,7 +120,6 @@
      ^{:key nth-col}
      [data-table-cell
       columns
-      data
       (get row-data key)
       nth-row
       nth-col

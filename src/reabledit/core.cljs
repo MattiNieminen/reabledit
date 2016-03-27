@@ -40,7 +40,6 @@
            ^{:key nth-row}
            [components/data-table-row
             columns
-            data
             row-data
             nth-row
             state
