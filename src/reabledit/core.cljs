@@ -33,8 +33,7 @@
                                                   state
                                                   enable-edit!
                                                   disable-edit!
-                                                  set-selected!)
-          :on-double-click enable-edit!}
+                                                  set-selected!)}
          [components/data-table-headers columns]
          (for [[nth-row row-data] (map-indexed vector data)]
            ^{:key nth-row}

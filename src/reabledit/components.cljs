@@ -103,7 +103,8 @@
             view (or (:view column) (span-view))
             editor (or (:editor column) (string-editor))]
         [:div.reabledit-cell {:class (if @selected? "selected")
-                              :on-click #(set-selected! nth-row nth-col)}
+                              :on-click #(set-selected! nth-row nth-col)
+                              :on-double-click enable-edit!}
          (if (and @selected? @edit?)
            (let [path [:edit :updated (:key column)]
                  value-in-state (get-in @state path)
