@@ -59,11 +59,14 @@
                        (min cols (inc current-col))
                        state))
 
-      ;; Enter in editing mode disables editing
+      ;; Enter in editing mode disables it and moves selection to cell under
       (and (:edit @state) (= keycode 13))
       (do
         (.preventDefault e)
-        (move-to-cell! row-change-fn current-row current-col state))
+        (move-to-cell! row-change-fn
+                       (min rows (inc current-row))
+                       current-col
+                       state))
 
       ;; Arrow keys in navigation mode change the selected cell
       ;; Enter and F2 in navigation mode enable editing mode
