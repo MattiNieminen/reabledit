@@ -19,7 +19,6 @@
                first
                :value)]))
 
-
 ;;
 ;; Cell editors
 ;;
@@ -93,41 +92,53 @@
 ;;
 
 (defn data-table-cell
-  [columns v nth-row nth-col state
-   enable-edit! disable-edit! set-selected!]
-  (let [selected? (reaction (= (:selected @state) [nth-row nth-col]))
-        edit? (reaction (:edit @state))]
-    (fn [columns v nth-row nth-col state
-         enable-edit! disable-edit! set-selected!]
-      (let [column (nth columns nth-col)
-            view (or (:view column) (span-view))
-            editor (or (:editor column) (string-editor))]
-        [:div.reabledit-cell {:class (if @selected? "selected")
-                              :on-click #(set-selected! nth-row nth-col)
-                              :on-double-click enable-edit!}
-         (if (and @selected? @edit?)
-           (let [path [:edit :updated (:key column)]
-                 value-in-state (get-in @state path)
-                 change-fn #(swap! state assoc-in path %)]
-             [editor value-in-state change-fn disable-edit!])
-           [view v enable-edit!])]))))
+  [column row-change-fn row-data nth-row nth-col rows cols state]
+  (let [{:keys [selected? edited?]} @(reagent/track util/cell-info
+                                                    nth-row
+                                                    nth-col
+                                                    state)
+        enable-edit! #(util/enable-edit! column row-data state)
+        move-to-cell! #(util/move-to-cell! row-change-fn
+                                           nth-row
+                                           nth-col
+                                           state)]
+    [:div.reabledit-cell
+     {:id (util/cell-id nth-row nth-col)
+      :class (if selected? "selected")
+      :tabIndex 0
+      :on-key-down #(util/default-handle-key-down %
+                                                  row-change-fn
+                                                  column
+                                                  row-data
+                                                  rows
+                                                  cols
+                                                  state)
+      :on-click #(move-to-cell!)
+      :on-double-click #(enable-edit!)}
+     (if edited?
+       (let [editor (or (:editor column) (string-editor))
+             path [:edit :updated (:key column)]]
+         [editor
+          (get-in @state path)
+          #(swap! state assoc-in path %)
+          move-to-cell!])
+       (let [view (or (:view column) (span-view))]
+         [view (get row-data (:key column)) enable-edit!]))]))
 
 (defn data-table-row
-  [columns row-data nth-row state
-   enable-edit! disable-edit! set-selected!]
+  [columns row-change-fn row-data nth-row rows cols state]
   [:div.reabledit-row
-   ;; TODO: run map-indexed to columns only once
-   (for [[nth-col {:keys [key value]}] (map-indexed vector columns)]
+   (for [[nth-col column] (map-indexed vector columns)]
      ^{:key nth-col}
      [data-table-cell
-      columns
-      (get row-data key)
+      column
+      row-change-fn
+      row-data
       nth-row
       nth-col
-      state
-      enable-edit!
-      disable-edit!
-      set-selected!])])
+      rows
+      cols
+      state])])
 
 (defn data-table-headers
   [columns]

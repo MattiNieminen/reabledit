@@ -1,6 +1,5 @@
 (ns reabledit.core
   (:require [reabledit.components :as components]
-            [reabledit.keyboard :as keyboard]
             [reabledit.util :as util]
             [reagent.core :as reagent]))
 
@@ -18,30 +17,19 @@
 
 (defn data-table
   [columns data row-change-fn]
-  (let [element-id (gensym "reabledit-focusable")
-        state (reagent/atom {})]
+  (let [state (reagent/atom {})]
     (fn [columns data row-change-fn]
-      (let [enable-edit! (util/enable-edit-fn columns data state)
-            disable-edit! (util/disable-edit-fn state row-change-fn element-id)
-            set-selected! (util/set-selected-fn state disable-edit!)]
+      (let [rows (-> data count dec)
+            cols (-> columns count dec)]
         [:div.reabledit
-         {:id element-id
-          :tabIndex 0
-          :on-key-down #(keyboard/handle-key-down %
-                                                  columns
-                                                  data
-                                                  state
-                                                  enable-edit!
-                                                  disable-edit!
-                                                  set-selected!)}
          [components/data-table-headers columns]
          (for [[nth-row row-data] (map-indexed vector data)]
            ^{:key nth-row}
            [components/data-table-row
             columns
+            row-change-fn
             row-data
             nth-row
-            state
-            enable-edit!
-            disable-edit!
-            set-selected!])]))))
+            rows
+            cols
+            state])]))))
