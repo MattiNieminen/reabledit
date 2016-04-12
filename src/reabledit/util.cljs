@@ -36,10 +36,28 @@
 (defn default-handle-key-down
   [e row-change-fn column row-data rows cols state]
   (let [keycode (.-keyCode e)
+        meta? (.-metaKey e)
         shift? (.-shiftKey e)
         current-row (-> @state :selected first)
         current-col (-> @state :selected second)]
     (cond
+
+      ;; CMD / CTRL -combinations, when edit mode is not enabled
+      (and (not (:edit @state)) meta?)
+      (do
+        (.preventDefault e)
+        (case keycode
+
+          ;; Home selects the first cell
+          36 (move-to-cell! row-change-fn 0 0 state)
+
+          ;; Arrow keys move to the beginning of row or col
+          37 (move-to-cell! row-change-fn current-row 0 state)
+          38 (move-to-cell! row-change-fn 0 current-col state)
+          39 (move-to-cell! row-change-fn current-row cols state)
+          40 (move-to-cell! row-change-fn rows current-col state)
+          nil
+          ))
 
       ;; Home moves to the beginning of row if not in edit mode
       (and (not (:edit @state)) (= keycode 36))
