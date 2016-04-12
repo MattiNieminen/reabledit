@@ -41,6 +41,15 @@
         current-col (-> @state :selected second)]
     (cond
 
+      ;; Home moves to the beginning of row if not in edit mode
+      (and (not (:edit @state)) (= keycode 36))
+      (do
+        (.preventDefault e)
+        (move-to-cell! row-change-fn
+                       current-row
+                       0
+                       state))
+
       ;; Shift + tab moves one cell backwards
       (and shift? (= keycode 9))
       (do
