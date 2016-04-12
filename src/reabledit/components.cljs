@@ -65,27 +65,27 @@
 
 (defn dropdown-editor
   [options]
-  (with-meta
-    (fn [v change-fn disable-edit!]
-      [:div.reabledit-dropdown
-       {:tabIndex 0
-        :on-key-down #(dropdown-editor-on-key-down % v change-fn options)}
-       [:span (-> (filter #(= (:key %) v) options)
-                  first
-                  :value)]
-       [:div.reabledit-dropdown-items
-        (for [{:keys [key value]} options]
-          ^{:key key}
-          [:div.reabledit-dropdown-item
-           {:class (if (= key v) "selected")
-            :on-click (fn [e]
-                        (.stopPropagation e)
-                        (change-fn key)
-                        (disable-edit!))}
-           [:span value]])]])
-    {:component-did-mount
-     (fn [this]
-       (.focus (reagent/dom-node this)))}))
+  (fn [v change-fn disable-edit!]
+    (reagent/create-class
+     {:component-did-mount #(.focus (reagent/dom-node %))
+      :reagent-render
+      (fn [v change-fn disable-edit!]
+        [:div.reabledit-dropdown
+         {:tabIndex 0
+          :on-key-down #(dropdown-editor-on-key-down % v change-fn options)}
+         [:span (-> (filter #(= (:key %) v) options)
+                    first
+                    :value)]
+         [:div.reabledit-dropdown-items
+          (for [{:keys [key value]} options]
+            ^{:key key}
+            [:div.reabledit-dropdown-item
+             {:class (if (= key v) "selected")
+              :on-click (fn [e]
+                          (.stopPropagation e)
+                          (change-fn key)
+                          (disable-edit!))}
+             [:span value]])]])})))
 
 ;;
 ;; Dependencies for the main component
