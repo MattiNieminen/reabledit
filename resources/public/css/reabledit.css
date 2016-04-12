@@ -24,6 +24,7 @@
   background-color: #fff;
   border: 1px solid #ddd;
   height: 30px;
+  outline: none;
 }
 
 .reabledit-cell.selected {
