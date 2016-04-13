@@ -26,8 +26,8 @@
 
 (defn data-table*
   [data-atom]
-  [:div {:style {:overflow "auto"
-                 :height "430px"}}
+  [:div
+   {:style {:height "430px"}}
    [reabledit/data-table example-columns @data-atom example-row-fn]])
 
 (defcard-rg reabledit

@@ -1,7 +1,7 @@
 .reabledit {
-  display: flex;
-  flex-flow: column nowrap;
   border: 2px solid #ddd;
+  overflow: auto;
+  height: 100%;
 }
 
 .reabledit-row {
