@@ -142,7 +142,7 @@
 
 (defn data-table-headers
   [columns]
-  [:div.reabledit-row
+  [:div.reabledit-row.reabledit-column-row
    (for [{:keys [key value]} columns]
      ^{:key key}
      [:div.reabledit-cell.reabledit-header
