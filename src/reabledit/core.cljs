@@ -19,10 +19,10 @@
   [columns data row-change-fn]
   (let [state (reagent/atom {})]
     (fn [columns data row-change-fn]
-      (let [rows (-> data count dec)
-            cols (-> columns count dec)]
+      (let [rows (count data)
+            cols (count columns)]
         [:div.reabledit
-         [components/data-table-headers columns]
+         [components/data-table-headers columns state]
          (for [[nth-row row-data] (map-indexed vector data)]
            ^{:key nth-row}
            [components/data-table-row

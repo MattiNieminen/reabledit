@@ -1,15 +1,30 @@
 (ns reabledit.util)
 
+(defn header-id
+  [k]
+  (str "reabledit-header-" (name k)))
+
+(defn columns-state
+  [state]
+  (select-keys @state [:columns :resize]))
+
 (defn cell-id
   [nth-row nth-col]
   (str "reabledit-cell-" nth-row "-" nth-col))
 
 (defn cell-info
-  [nth-row nth-col state]
-  (let [{:keys [selected edit]} @state]
-    (if (= selected [nth-row nth-col])
-      {:selected? true
-       :edited? (boolean edit)})))
+  [k nth-row nth-col state]
+  (let [{:keys [selected edit columns]} @state
+        selected? (= selected [nth-row nth-col])]
+    {:selected? selected?
+     :edited? (and selected? edit)
+     :width (get-in columns [k :width])}))
+
+(defn column-width
+  [width cols]
+  (if width
+    (str width "px")
+    (str (/ 100 cols) "%")))
 
 (defn enable-edit!
   [column row-data state]
@@ -28,7 +43,7 @@
           updated (get-in @state [:edit :updated])]
       (if-not (= initial updated)
         (row-change-fn (first (:selected @state)) initial updated))))
-  (reset! state {:selected [nth-row nth-col]})
+  (swap! state #(assoc (dissoc % :edit) :selected [nth-row nth-col]))
 
   ;; Dirty as fudge, but what can you do with Reagent?
   (.focus (.getElementById js/document (cell-id nth-row nth-col))))
@@ -39,7 +54,9 @@
         meta? (.-metaKey e)
         shift? (.-shiftKey e)
         current-row (-> @state :selected first)
-        current-col (-> @state :selected second)]
+        current-col (-> @state :selected second)
+        max-row (dec rows)
+        max-col (dec cols)]
     (cond
 
       ;; CMD / CTRL -combinations, when edit mode is not enabled
@@ -54,8 +71,8 @@
           ;; Arrow keys move to the beginning of row or col
           37 (move-to-cell! row-change-fn current-row 0 state)
           38 (move-to-cell! row-change-fn 0 current-col state)
-          39 (move-to-cell! row-change-fn current-row cols state)
-          40 (move-to-cell! row-change-fn rows current-col state)
+          39 (move-to-cell! row-change-fn current-row max-col state)
+          40 (move-to-cell! row-change-fn max-row current-col state)
           nil
           ))
 
@@ -83,7 +100,7 @@
         (.preventDefault e)
         (move-to-cell! row-change-fn
                        current-row
-                       (min cols (inc current-col))
+                       (min max-col (inc current-col))
                        state))
 
       ;; Enter in editing mode disables it and moves selection to cell under
@@ -91,7 +108,7 @@
       (do
         (.preventDefault e)
         (move-to-cell! row-change-fn
-                       (min rows (inc current-row))
+                       (min max-row (inc current-row))
                        current-col
                        state))
 
@@ -111,10 +128,10 @@
                             state)
           39 (move-to-cell! row-change-fn
                             current-row
-                            (min cols (inc current-col))
+                            (min max-col (inc current-col))
                             state)
           40 (move-to-cell! row-change-fn
-                            (min rows (inc current-row))
+                            (min max-row (inc current-row))
                             current-col
                             state)
           13 (enable-edit! column row-data state)

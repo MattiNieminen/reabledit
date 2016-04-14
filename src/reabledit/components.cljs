@@ -93,10 +93,11 @@
 
 (defn data-table-cell
   [column row-change-fn row-data nth-row nth-col rows cols state]
-  (let [{:keys [selected? edited?]} @(reagent/track util/cell-info
-                                                    nth-row
-                                                    nth-col
-                                                    state)
+  (let [{:keys [selected? edited? width]} @(reagent/track util/cell-info
+                                                          (:key column)
+                                                          nth-row
+                                                          nth-col
+                                                          state)
         enable-edit! #(util/enable-edit! column row-data state)
         move-to-cell! #(util/move-to-cell! row-change-fn
                                            nth-row
@@ -106,6 +107,7 @@
      {:id (util/cell-id nth-row nth-col)
       :class (if selected? "selected")
       :tabIndex 0
+      :style {:width (util/column-width width cols)}
       :on-key-down #(util/default-handle-key-down %
                                                   row-change-fn
                                                   column
@@ -140,10 +142,42 @@
       cols
       state])])
 
+(defn start-resize!
+  [e k state]
+  (swap! state assoc :resize k)
+  (.setData (.-dataTransfer e) "Text" (name k)))
+
+(defn stop-resize!
+  [state]
+  (swap! state dissoc :resize))
+
+(defn resize!
+  [e state]
+  (let [k (:resize @state)
+        element (.getElementById js/document (util/header-id k))
+        width (- (.-screenX e) (.-left (.getBoundingClientRect element)))]
+    (swap! state assoc-in [:columns k :width] width)))
+
 (defn data-table-headers
-  [columns]
-  [:div.reabledit-row.reabledit-column-row
-   (for [{:keys [key value]} columns]
-     ^{:key key}
-     [:div.reabledit-cell.reabledit-header
-      [:span value]])])
+  [columns state]
+  (let [column-data (:columns @state)]
+    [:div.reabledit-row.reabledit-column-row
+     (if (:resize @state)
+       [:div.reabledit-resize-area
+        {:on-drag-over (fn [e]
+                         (.preventDefault e)
+                         (resize! e state))
+         :on-drop (fn [e]
+                    (.preventDefault e)
+                    (stop-resize! state))}])
+     (for [{:keys [key value]} columns]
+       ^{:key key}
+       [:div.reabledit-cell.reabledit-header
+        {:id (util/header-id key)
+         :style {:width (util/column-width (get-in column-data [key :width])
+                                           (count columns))}}
+        [:span value]
+        [:div.reabledit-header-handle
+         {:draggable true
+          :on-drag-start #(start-resize! % key state)
+          :on-drag-end #(stop-resize! state)}]])]))
