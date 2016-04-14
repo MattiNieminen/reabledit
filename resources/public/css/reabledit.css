@@ -36,6 +36,7 @@
   border: 1px solid #ddd;
   height: 30px;
   outline: none;
+  overflow: hidden;
 }
 
 .reabledit-cell.selected {
