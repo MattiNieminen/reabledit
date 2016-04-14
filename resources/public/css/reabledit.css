@@ -58,7 +58,7 @@
 
 .reabledit-dropdown {
   position: absolute;
-  width: 300px;
+  width: inherit;
 }
 
 .reabledit-dropdown:focus {
