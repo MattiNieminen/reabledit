@@ -27,10 +27,14 @@
     (str (/ 100 cols) "%")))
 
 (defn enable-edit!
-  [column row-data state]
-  (if-not (:disable-edit column)
-    (swap! state assoc :edit {:initial row-data
-                              :updated row-data})))
+  ([column row-data state]
+   (enable-edit! column row-data state nil))
+  ([column row-data state input]
+   (when-not (:disable-edit column)
+     (swap! state assoc :edit {:initial row-data
+                               :updated (if input
+                                          (assoc row-data (:key column) input)
+                                          row-data)}))))
 
 ;; This function serves multiple purposes:
 ;; 1) Move selection to certain cell
@@ -114,29 +118,32 @@
 
       ;; Arrow keys in navigation mode change the selected cell
       ;; Enter and F2 in navigation mode enable editing mode
+      ;; Most keycodes take user to edit mode
       (nil? (:edit @state))
-      (do
+      (let [input (-> e .-nativeEvent .-key)]
         (.preventDefault e)
-        (case keycode
-          37 (move-to-cell! row-change-fn
-                            current-row
-                            (max 0 (dec current-col))
-                            state)
-          38 (move-to-cell! row-change-fn
-                            (max 0 (dec current-row))
-                            current-col
-                            state)
-          39 (move-to-cell! row-change-fn
-                            current-row
-                            (min max-col (inc current-col))
-                            state)
-          40 (move-to-cell! row-change-fn
-                            (min max-row (inc current-row))
-                            current-col
-                            state)
-          13 (enable-edit! column row-data state)
-          113 (enable-edit! column row-data state)
-          nil)))))
+        (if (and (= (count input) 1))
+          (enable-edit! column row-data state input)
+          (case keycode
+            37 (move-to-cell! row-change-fn
+                              current-row
+                              (max 0 (dec current-col))
+                              state)
+            38 (move-to-cell! row-change-fn
+                              (max 0 (dec current-row))
+                              current-col
+                              state)
+            39 (move-to-cell! row-change-fn
+                              current-row
+                              (min max-col (inc current-col))
+                              state)
+            40 (move-to-cell! row-change-fn
+                              (min max-row (inc current-row))
+                              current-col
+                              state)
+            13 (enable-edit! column row-data state)
+            113 (enable-edit! column row-data state)
+            nil))))))
 
 (defn move-cursor-to-end!
   [e]
