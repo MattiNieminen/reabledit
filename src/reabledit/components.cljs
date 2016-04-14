@@ -7,7 +7,7 @@
 ;; Cell views
 ;;
 
-(defn span-view
+(defn string-view
   []
   (fn [v _]
     [:span v]))
@@ -124,7 +124,7 @@
           (get-in @state path)
           #(swap! state assoc-in path %)
           move-to-cell!])
-       (let [view (or (:view column) (span-view))]
+       (let [view (or (:view column) (string-view))]
          [view (get row-data (:key column)) enable-edit!]))]))
 
 (defn data-table-row
