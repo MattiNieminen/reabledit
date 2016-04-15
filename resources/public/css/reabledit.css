@@ -19,12 +19,12 @@
 .reabledit-header {
   background-color: #f3f3f3 !important;
   font-weight: bold;
+  display: flex;
+  justify-content: space-between;
 }
 
 .reabledit-header-handle {
   width: 10px;
-  height: 100%;
-  float: right;
   cursor: ew-resize;
 }
 
