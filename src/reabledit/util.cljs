@@ -120,10 +120,22 @@
       ;; Enter and F2 in navigation mode enable editing mode
       ;; Most keycodes take user to edit mode
       (nil? (:edit @state))
-      (let [input (-> e .-nativeEvent .-key)]
+
+      ;; Trust key property if it's available
+      ;; Otherwise do your best with keyCode
+      (let [key (-> e .-nativeEvent .-key)
+            from-charcode (.fromCharCode js/String keycode)]
         (.preventDefault e)
-        (if (and (= (count input) 1))
-          (enable-edit! column row-data state input)
+        (cond
+          (= (count key) 1)
+          (enable-edit! column row-data state key)
+
+          (and from-charcode (re-matches #"\d|\w" from-charcode))
+          (enable-edit! column row-data state (if shift?
+                                                from-charcode
+                                                (.toLowerCase from-charcode)))
+
+          :else
           (case keycode
             37 (move-to-cell! row-change-fn
                               current-row
