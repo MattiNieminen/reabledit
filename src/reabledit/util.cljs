@@ -123,7 +123,7 @@
 
       ;; Trust key property if it's available
       ;; Otherwise do your best with keyCode
-      (let [key (-> e .-nativeEvent .-key)
+      (let [key (-> e .-key)
             from-charcode (.fromCharCode js/String keycode)]
         (.preventDefault e)
         (cond
