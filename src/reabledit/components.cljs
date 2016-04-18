@@ -145,7 +145,8 @@
 (defn start-resize!
   [e k state]
   (swap! state assoc :resize k)
-  (.setData (.-dataTransfer e) "Text" (name k)))
+  (.setData (.-dataTransfer e) "Text" (name k))
+  (set! (-> e .-dataTransfer .-effectAllowed) "move"))
 
 (defn stop-resize!
   [state]
@@ -155,7 +156,7 @@
   [e state]
   (let [k (:resize @state)
         element (.getElementById js/document (util/header-id k))
-        width (- (.-screenX e) (.-left (.getBoundingClientRect element)))]
+        width (- (.-pageX e) (.-left (.getBoundingClientRect element)))]
     (swap! state assoc-in [:columns k :width] width)))
 
 (defn data-table-headers

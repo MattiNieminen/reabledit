@@ -5,11 +5,11 @@
 }
 
 .reabledit-resize-area {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .reabledit-row {
@@ -26,6 +26,7 @@
 .reabledit-header-handle {
   width: 10px;
   cursor: ew-resize;
+  opacity: 0;
 }
 
 .reabledit-cell {
