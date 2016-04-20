@@ -1,4 +1,5 @@
-(ns reabledit.util)
+(ns reabledit.util
+  (:require [goog.dom :as dom]))
 
 (defn header-id
   [k]
@@ -163,3 +164,13 @@
         length (count (.-value el))]
     (set! (.-selectionStart el) length)
     (set! (.-selectionEnd el) length)))
+
+(defn vertical-scrollbar-size
+  [main-el]
+  (let [scroll-el (aget (dom/getElementsByClass
+                         "reabledit-data-rows-container"
+                         main-el)
+                        0)]
+    (if scroll-el
+      (- (.-offsetWidth scroll-el) (.-clientWidth scroll-el))
+      0)))

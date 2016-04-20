@@ -1,6 +1,6 @@
 .reabledit {
   border: 2px solid #ddd;
-  overflow: auto;
+  overflow: hidden;
   height: 100%;
 }
 
@@ -16,6 +16,10 @@
   display: flex;
 }
 
+.reabledit-header-row {
+  overflow: hidden;
+}
+
 .reabledit-header {
   background-color: #f3f3f3 !important;
   font-weight: bold;
@@ -27,6 +31,15 @@
   width: 10px;
   cursor: ew-resize;
   opacity: 0;
+}
+
+.reabledit-header-scroll {
+  background-color: #f3f3f3 !important;
+  border: 1px solid #ddd;
+}
+
+.reabledit-data-rows-container {
+  overflow: auto;
 }
 
 .reabledit-cell {
