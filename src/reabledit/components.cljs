@@ -25,27 +25,29 @@
 
 (defn string-editor
   []
-  (fn [v change-fn _]
+  (fn [row-data k change-fn _]
     [:input {:type "text"
              :auto-focus true
              :on-focus util/move-cursor-to-end!
-             :value v
-             :on-change #(change-fn (-> % .-target .-value))}]))
+             :value (get row-data k)
+             :on-change #(change-fn (assoc row-data
+                                           k
+                                           (-> % .-target .-value)))}]))
 
 (defn int-editor
   []
-  (fn [v change-fn _]
+  (fn [row-data k change-fn _]
     [:input {:type "text"
              :auto-focus true
              :on-focus util/move-cursor-to-end!
-             :value v
+             :value (get row-data k)
              :on-change (fn [e]
                           (let [new-value (js/parseInt (-> e .-target .-value))
                                 int? (not (js/isNaN new-value))]
                             (if int?
-                              (change-fn new-value))))}]))
+                              (change-fn (assoc row-data k new-value)))))}]))
 
-(defn- dropdown-editor-on-key-down
+(defn- dropdown-editor-key-down
   [e v change-fn options]
   (let [keycode (.-keyCode e)
         position (first (keep-indexed #(if (= %2 v) %1)
@@ -65,27 +67,29 @@
 
 (defn dropdown-editor
   [options]
-  (fn [v change-fn disable-edit!]
+  (fn [row-data k change-fn disable-edit!]
     (reagent/create-class
      {:component-did-mount #(.focus (reagent/dom-node %))
       :reagent-render
-      (fn [v change-fn disable-edit!]
-        [:div.reabledit-dropdown
-         {:tabIndex 0
-          :on-key-down #(dropdown-editor-on-key-down % v change-fn options)}
-         [:span (-> (filter #(= (:key %) v) options)
-                    first
-                    :value)]
-         [:div.reabledit-dropdown-items
-          (for [{:keys [key value]} options]
-            ^{:key key}
-            [:div.reabledit-dropdown-item
-             {:class (if (= key v) "selected")
-              :on-click (fn [e]
-                          (.stopPropagation e)
-                          (change-fn key)
-                          (disable-edit!))}
-             [:span value]])]])})))
+      (fn [row-data k change-fn disable-edit!]
+        (let [v (get row-data k)
+              change-fn #(change-fn (assoc row-data k %))]
+          [:div.reabledit-dropdown
+           {:tabIndex 0
+            :on-key-down #(dropdown-editor-key-down % v change-fn options)}
+           [:span (-> (filter #(= (:key %) v) options)
+                      first
+                      :value)]
+           [:div.reabledit-dropdown-items
+            (for [{:keys [key value]} options]
+              ^{:key key}
+              [:div.reabledit-dropdown-item
+               {:class (if (= key v) "selected")
+                :on-click (fn [e]
+                            (.stopPropagation e)
+                            (change-fn key)
+                            (disable-edit!))}
+               [:span value]])]]))})))
 
 ;;
 ;; Dependencies for the main component
@@ -118,14 +122,15 @@
       :on-click #(move-to-cell!)
       :on-double-click #(enable-edit!)}
      (if edited?
-       (let [editor (or (:editor column) (string-editor))
-             path [:edit :updated (:key column)]]
-         [editor
-          (get-in @state path)
-          #(swap! state assoc-in path %)
-          move-to-cell!])
-       (let [view (or (:view column) (string-view))]
-         [view row-data (:key column) enable-edit!]))]))
+       [(or (:editor column) (string-editor))
+        (get-in @state [:edit :updated])
+        (:key column)
+        #(swap! state assoc-in [:edit :updated] %)
+        move-to-cell!]
+       [(or (:view column) (string-view))
+        row-data
+        (:key column)
+        enable-edit!])]))
 
 (defn data-table-row
   [columns row-change-fn row-data nth-row rows cols state]
