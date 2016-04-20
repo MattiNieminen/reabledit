@@ -9,13 +9,13 @@
 
 (defn string-view
   []
-  (fn [v _]
-    [:span v]))
+  (fn [row-data k _]
+    [:span (get row-data k)]))
 
 (defn dropdown-view
   [options]
-  (fn [v _]
-    [:span (-> (filter #(= (:key %) v) options)
+  (fn [row-data k _]
+    [:span (-> (filter #(= (:key %) (get row-data k)) options)
                first
                :value)]))
 
@@ -125,7 +125,7 @@
           #(swap! state assoc-in path %)
           move-to-cell!])
        (let [view (or (:view column) (string-view))]
-         [view (get row-data (:key column)) enable-edit!]))]))
+         [view row-data (:key column) enable-edit!]))]))
 
 (defn data-table-row
   [columns row-change-fn row-data nth-row rows cols state]
