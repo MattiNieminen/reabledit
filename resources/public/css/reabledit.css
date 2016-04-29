@@ -1,7 +1,8 @@
 .reabledit {
-  border: 2px solid #ddd;
   overflow: hidden;
   height: 100%;
+  border-top: 1px solid #ddd;
+  border-right: 1px solid #ddd;
 }
 
 .reabledit-resize-area {
@@ -35,7 +36,7 @@
 
 .reabledit-header-scroll {
   background-color: #f3f3f3 !important;
-  border: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
 .reabledit-data-rows-container {
@@ -46,8 +47,9 @@
   flex: 0 0 auto;
   min-width: 75px;
   box-sizing: border-box;
+  border-bottom: 1px solid #ddd;
+  border-left: 1px solid #ddd;
   background-color: #fff;
-  border: 1px solid #ddd;
   height: 30px;
   outline: none;
   overflow: hidden;
