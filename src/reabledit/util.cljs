@@ -117,46 +117,47 @@
                        current-col
                        state))
 
-      ;; Arrow keys in navigation mode change the selected cell
-      ;; Enter and F2 in navigation mode enable editing mode
-      ;; Most keycodes take user to edit mode
       (nil? (:edit @state))
-
-      ;; Trust key property if it's available
-      ;; Otherwise do your best with keyCode
       (let [key (-> e .-key)
             from-charcode (.fromCharCode js/String keycode)]
         (.preventDefault e)
         (cond
-          (= (count key) 1)
-          (enable-edit! column row-data state key)
 
+          ;; Arrow keys in navigation mode change the selected cell
+          (= keycode 37) (move-to-cell! row-change-fn
+                                        current-row
+                                        (max 0 (dec current-col))
+                                        state)
+          (= keycode 38) (move-to-cell! row-change-fn
+                                        (max 0 (dec current-row))
+                                        current-col
+                                        state)
+          (= keycode 39) (move-to-cell! row-change-fn
+                                        current-row
+                                        (min max-col (inc current-col))
+                                        state)
+          (= keycode 40) (move-to-cell! row-change-fn
+                                        (min max-row (inc current-row))
+                                        current-col
+                                        state)
+
+          ;; Enter and F2 in navigation mode enable editing mode
+          (= keycode 13) (enable-edit! column row-data state)
+          (= keycode 113) (enable-edit! column row-data state)
+
+          ;; Most keycodes take the user to edit mode
+          (= (count key) 1) (enable-edit! column row-data state key)
+
+          ;; If key property was not available, do you best with keyCode
           (and from-charcode (re-matches #"\d|\w" from-charcode))
-          (enable-edit! column row-data state (if shift?
-                                                from-charcode
-                                                (.toLowerCase from-charcode)))
+          (enable-edit! column
+                        row-data
+                        state (if shift?
+                                from-charcode
+                                (.toLowerCase from-charcode)))
 
           :else
-          (case keycode
-            37 (move-to-cell! row-change-fn
-                              current-row
-                              (max 0 (dec current-col))
-                              state)
-            38 (move-to-cell! row-change-fn
-                              (max 0 (dec current-row))
-                              current-col
-                              state)
-            39 (move-to-cell! row-change-fn
-                              current-row
-                              (min max-col (inc current-col))
-                              state)
-            40 (move-to-cell! row-change-fn
-                              (min max-row (inc current-row))
-                              current-col
-                              state)
-            13 (enable-edit! column row-data state)
-            113 (enable-edit! column row-data state)
-            nil))))))
+          nil)))))
 
 (defn move-cursor-to-end!
   [e]
