@@ -91,6 +91,8 @@
                             (disable-edit!))}
                [:span value]])]]))})))
 
+(defonce default-editor (string-editor))
+
 ;;
 ;; Dependencies for the main component
 ;;
@@ -122,7 +124,7 @@
       :on-click #(move-to-cell!)
       :on-double-click #(enable-edit!)}
      (if edited?
-       [(or (:editor column) (string-editor))
+       [(or (:editor column) default-editor)
         (get-in @state [:edit :updated])
         (:key column)
         #(swap! state assoc-in [:edit :updated] %)
