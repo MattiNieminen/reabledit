@@ -20,7 +20,7 @@
                 :optimizations :none
                 :source-map-timestamp true}}]}
   :profiles {:dev
-             {:dependencies [[devcards "0.2.1-6"]]
-              :plugins [[lein-figwheel "0.5.0-6"]]
+             {:dependencies [[devcards "0.2.1-7"]]
+              :plugins [[lein-figwheel "0.5.4-5"]]
               :resource-paths ["resources" "example-resources"]}}
   :figwheel {:css-dirs ["resources/public/css"]})
