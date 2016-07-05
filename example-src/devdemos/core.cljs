@@ -17,7 +17,7 @@
     :value "ID"
     :disable-edit true}
    {:key :name
-    :value "Name"}
+    :value "Name (not the secret identity)"}
    {:key :age
     :value "Age"
     :editor (components/int-editor)}
