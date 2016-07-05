@@ -1,7 +1,7 @@
 (ns reabledit.util
   (:require [goog.dom :as dom]))
 
-(def min-column-width 75)
+(def min-column-width 15)
 
 (defn header-id
   [k]

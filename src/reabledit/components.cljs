@@ -185,7 +185,7 @@
         {:id (util/header-id key)
          :style {:width (util/column-width (get-in column-data [key :width])
                                            (count columns))}}
-        [:span value]
+        [:span.reabledit-header-text value]
         [:div.reabledit-header-handle
          {:draggable true
           :on-drag-start #(start-resize! % key state)

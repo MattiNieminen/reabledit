@@ -28,10 +28,13 @@
   justify-content: space-between;
 }
 
+.reabledit-header-text {
+  overflow: hidden;
+}
+
 .reabledit-header-handle {
-  width: 10px;
+  flex: 0 0 5px;
   cursor: ew-resize;
-  opacity: 0;
 }
 
 .reabledit-header-scroll {
