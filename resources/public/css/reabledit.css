@@ -72,6 +72,12 @@
   padding-left: 6px;
   font-size: 95%;
   box-sizing: border-box;
+  border: 0;
+}
+
+.reabledit-cell .coercion-error {
+  background-color: #ffadbb;
+  color: #d82a32;
 }
 
 .reabledit-dropdown {

@@ -1,7 +1,8 @@
 (ns reabledit.components
   (:require [reabledit.util :as util]
             [reagent.core :as reagent]
-            [reagent.ratom :refer-macros [reaction]]))
+            [reagent.ratom :refer-macros [reaction]]
+            [clojure.string :as str]))
 
 ;;
 ;; Cell views
@@ -34,18 +35,30 @@
                                            k
                                            (-> % .-target .-value)))}]))
 
+(defn int-coercable?
+  [s]
+  (re-matches #"\s*((0[,.]0*)|0|([1-9][0-9]*)([.,]0*)?)\s*" s))
+
 (defn int-editor
   []
   (fn [row-data k change-fn _]
-    [:input {:type "text"
-             :auto-focus true
-             :on-focus util/move-cursor-to-end!
-             :value (get row-data k)
-             :on-change (fn [e]
-                          (let [new-value (js/parseInt (-> e .-target .-value))
-                                int? (not (js/isNaN new-value))]
-                            (if int?
-                              (change-fn (assoc row-data k new-value)))))}]))
+    (let [initial-value (get row-data k)
+          input (reagent/atom (str initial-value))]
+      (fn [row-data k change-fn _]
+        [:input {:type "text"
+                 :auto-focus true
+                 :on-focus util/move-cursor-to-end!
+                 :value @input
+                 :class (if-not (int-coercable? @input) "coercion-error")
+                 :on-change (fn [e]
+                              (let [new-input (-> e .-target .-value)
+                                    new-value (if (int-coercable? new-input)
+                                                (js/parseInt new-input)
+                                                initial-value)]
+                                (reset! input new-input)
+                                (change-fn (assoc row-data
+                                                  k
+                                                  new-value))))}]))))
 
 (defn- dropdown-editor-key-down
   [e v change-fn options]
