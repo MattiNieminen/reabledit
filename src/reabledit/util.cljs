@@ -1,6 +1,8 @@
 (ns reabledit.util
   (:require [goog.dom :as dom]))
 
+(def min-column-width 75)
+
 (defn header-id
   [k]
   (str "reabledit-header-" (name k)))
@@ -24,7 +26,7 @@
 (defn column-width
   [width cols]
   (if width
-    (str width "px")
+    (str (max min-column-width width) "px")
     (str (/ 100 cols) "%")))
 
 (defn enable-edit!
