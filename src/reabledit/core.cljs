@@ -32,6 +32,8 @@
                                    (:main-el @state))
                                   0)]
           [:div.reabledit
+           ;; Uncomment for debugging
+           ;; [:pre (pr-str @state)]
            [components/data-table-headers columns state]
            [:div.reabledit-data-rows-container
             (if header-row-el
