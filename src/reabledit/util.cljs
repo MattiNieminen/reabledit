@@ -8,31 +8,31 @@
   (str "reabledit-header-" (name k)))
 
 (defn cell-id
-  [primary-key row-data column]
-  (str "reabledit-cell-" (get row-data primary-key) "-" (:key column)))
+  [column-key row-id]
+  (str "reabledit-cell-" row-id "-" column-key))
 
-(defn selected-cell [primary-key row-data column]
-  {:row (get row-data primary-key)
-   :column (:key column)})
+(defn selected-cell [column-key row-id]
+  {:column column-key
+   :row row-id})
 
 (defn cell-info
-  [primary-key row-data column state]
+  [state column-key row-id]
   (let [{:keys [selected edit columns]} @state
-        selected? (= selected (selected-cell primary-key row-data column))]
+        selected? (= selected (selected-cell column-key row-id))]
     {:selected? selected?
      :edited? (and selected? edit)
-     :width (get-in columns [(:key column) :width])}))
+     :width (get-in columns [column-key :width])}))
 
 (defn column-width
-  [columns width]
+  [column-count width]
   (if width
     (str (max min-column-width width) "px")
-    (str (/ 100 (count columns)) "%")))
+    (str (/ 100 column-count) "%")))
 
 (defn enable-edit!
-  ([row-data column state]
-   (enable-edit! row-data column state nil))
-  ([row-data column state input]
+  ([state row-data column]
+   (enable-edit! state row-data column nil))
+  ([state row-data column input]
    (when-not (:disable-edit column)
      (swap! state assoc :edit {:initial row-data
                                :updated (if input
@@ -42,30 +42,29 @@
 (defn find-index [coll v]
   (first (keep-indexed #(if (= %2 v) %1) coll)))
 
-(defn move-candidates [columns data primary-key row-data column]
-  (let [column-index (find-index (map :key columns) (:key column))
-        row-index (find-index (map #(get % primary-key) data)
-                              (get row-data primary-key))
-        column-count (count columns)
-        row-count (count data)]
-    {:first-column (first columns)
-     :last-column (last columns)
-     :current-column column
+(defn move-candidates [column-keys row-ids column-key row-id]
+  (let [column-index (find-index column-keys column-key)
+        row-index (find-index row-ids row-id)
+        column-count (count column-keys)
+        row-count (count row-ids)]
+    {:first-column (first column-keys)
+     :last-column (last column-keys)
+     :current-column column-key
      :previous-column (if (zero? column-index)
-                        column
-                        (get columns (dec column-index)))
+                        column-key
+                        (get column-keys (dec column-index)))
      :next-column (if (= (dec column-count) column-index)
-                    column
-                    (get columns (inc column-index)))
-     :first-row (first data)
-     :last-row (last data)
-     :current-row row-data
+                    column-key
+                    (get column-keys (inc column-index)))
+     :first-row (first row-ids)
+     :last-row (last row-ids)
+     :current-row row-id
      :previous-row (if (zero? row-index)
-                     row-data
-                     (get data (dec row-index)))
+                     row-id
+                     (get row-ids (dec row-index)))
      :next-row (if (= (dec row-count) row-index)
-                 row-data
-                 (get data (inc row-index)))}))
+                 row-id
+                 (get row-ids (inc row-index)))}))
 
 
 ;; This function serves multiple purposes:
@@ -73,24 +72,23 @@
 ;; 2) Disable editing mode, and invoke row-change-fn if necessary
 ;; 3) Keep focus in the correct cell
 (defn move-to-cell!
-  [data primary-key row-change-fn row-data column state]
+  [row-change-fn state row-ids column-key row-id]
   (when (:edit @state)
     (let [initial (get-in @state [:edit :initial])
           updated (get-in @state [:edit :updated])]
       (if-not (= initial updated)
-        (row-change-fn (find-index (map #(get % primary-key) data)
-                                   (get-in @state [:selected :row]))
+        (row-change-fn (find-index row-ids (get-in @state [:selected :row]))
                        initial
                        updated))))
   (swap! state #(assoc (dissoc % :edit)
                        :selected
-                       (selected-cell primary-key row-data column)))
+                       (selected-cell column-key row-id)))
 
   ;; Dirty as fudge, but what can you do with Reagent?
-  (.focus (.getElementById js/document (cell-id primary-key row-data column))))
+  (.focus (.getElementById js/document (cell-id column-key row-id))))
 
 (defn default-handle-key-down
-  [e columns data primary-key row-change-fn row-data column state]
+  [e row-change-fn state column-keys row-ids row-data column column-key row-id]
   (let [keycode (.-keyCode e)
         meta? (.-metaKey e)
         shift? (.-shiftKey e)
@@ -105,8 +103,8 @@
                 current-row
                 previous-row
                 next-row]}
-        (move-candidates columns data primary-key row-data column)
-        move-fn! #(move-to-cell! data primary-key row-change-fn %1 %2 state)]
+        (move-candidates column-keys row-ids column-key row-id)
+        move-fn! (partial move-to-cell! row-change-fn state row-ids)]
     (cond
 
       ;; CMD / CTRL -combinations, when edit mode is not enabled
@@ -116,38 +114,38 @@
         (case keycode
 
           ;; Home selects the first cell
-          36 (move-fn! first-row first-column)
+          36 (move-fn! first-column first-row)
 
           ;; Arrow keys move to the beginning of row or col
-          37 (move-fn! current-row first-column)
-          38 (move-fn! first-row current-column)
-          39 (move-fn! current-row last-column)
-          40 (move-fn! last-row current-column)
+          37 (move-fn! first-column current-row)
+          38 (move-fn! current-column first-row)
+          39 (move-fn! last-column current-row)
+          40 (move-fn! current-column last-row)
           nil))
 
       ;; Home moves to the beginning of row if not in edit mode
       (and (not (:edit @state)) (= keycode 36))
       (do
         (.preventDefault e)
-        (move-fn! current-row first-column))
+        (move-fn! first-column current-row))
 
       ;; Shift + tab moves one cell backwards
       (and shift? (= keycode 9))
       (do
         (.preventDefault e)
-        (move-fn! current-row previous-column))
+        (move-fn! previous-column current-row))
 
       ;; Tab always moves one cell forward
       (= keycode 9)
       (do
         (.preventDefault e)
-        (move-fn! current-row next-column))
+        (move-fn! next-column current-row))
 
       ;; Enter in editing mode disables it and moves selection to cell under
       (and (:edit @state) (= keycode 13))
       (do
         (.preventDefault e)
-        (move-fn! next-row current-column))
+        (move-fn! current-column next-row))
 
       (nil? (:edit @state))
       (let [key (-> e .-key)
@@ -156,17 +154,17 @@
         (cond
 
           ;; Arrow keys in navigation mode change the selected cell
-          (= keycode 37) (move-fn! current-row previous-column)
-          (= keycode 38) (move-fn! previous-row current-column)
-          (= keycode 39) (move-fn! current-row next-column)
-          (= keycode 40) (move-fn! next-row current-column)
+          (= keycode 37) (move-fn! previous-column current-row)
+          (= keycode 38) (move-fn! current-column previous-row)
+          (= keycode 39) (move-fn! next-column current-row)
+          (= keycode 40) (move-fn! current-column next-row)
 
           ;; Enter and F2 in navigation mode enable editing mode
-          (= keycode 13) (enable-edit! current-row current-column state)
-          (= keycode 113) (enable-edit! current-row current-column state)
+          (= keycode 13) (enable-edit! state row-data column)
+          (= keycode 113) (enable-edit! state row-data column)
 
           ;; Most keycodes take the user to edit mode
-          (= (count key) 1) (enable-edit! current-row current-column state key)
+          (= (count key) 1) (enable-edit! state row-data column key)
 
           ;; If key property was not available, do you best with keyCode
           (and from-charcode (re-matches #"\d|\w" from-charcode))

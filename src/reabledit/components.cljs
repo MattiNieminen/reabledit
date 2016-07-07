@@ -111,32 +111,33 @@
 ;;
 
 (defn data-table-cell
-  [columns data primary-key row-change-fn row-data column state]
-  (let [{:keys [selected? edited? width]} @(reagent/track util/cell-info
-                                                          primary-key
-                                                          row-data
-                                                          column
-                                                          state)
-        enable-edit! #(util/enable-edit! row-data column state)
-        move-to-cell! #(util/move-to-cell! data
-                                           primary-key
-                                           row-change-fn
-                                           row-data
-                                           column
-                                           state)]
+  [primary-key row-change-fn state column-keys row-ids row-data column]
+  (let [column-key (:key column)
+        row-id (get row-data primary-key)
+        {:keys [selected? edited? width]} @(reagent/track util/cell-info
+                                                          state
+                                                          column-key
+                                                          row-id)
+        enable-edit! #(util/enable-edit! state row-data column)
+        move-to-cell! #(util/move-to-cell! row-change-fn
+                                           state
+                                           row-ids
+                                           column-key
+                                           row-id)]
     [:div.reabledit-cell
-     {:id (util/cell-id primary-key row-data column)
+     {:id (util/cell-id column-key row-id)
       :class (if selected? "selected")
       :tabIndex 0
-      :style {:width (util/column-width columns width)}
+      :style {:width (util/column-width (count column-keys) width)}
       :on-key-down #(util/default-handle-key-down %
-                                                  columns
-                                                  data
-                                                  primary-key
                                                   row-change-fn
+                                                  state
+                                                  column-keys
+                                                  row-ids
                                                   row-data
                                                   column
-                                                  state)
+                                                  column-key
+                                                  row-id)
       :on-click #(move-to-cell!)
       :on-double-click #(enable-edit!)}
      (if edited?
@@ -151,18 +152,18 @@
         enable-edit!])]))
 
 (defn data-table-row
-  [columns data primary-key row-change-fn row-data state]
+  [columns primary-key row-change-fn state column-keys row-ids row-data]
   [:div.reabledit-row
    (for [column columns]
      ^{:key (:key column)}
      [data-table-cell
-      columns
-      data
       primary-key
       row-change-fn
+      state
+      column-keys
+      row-ids
       row-data
-      column
-      state])])
+      column])])
 
 (defn start-resize!
   [e k state]
@@ -198,7 +199,7 @@
        ^{:key key}
        [:div.reabledit-cell.reabledit-header
         {:id (util/header-id key)
-         :style {:width (util/column-width columns
+         :style {:width (util/column-width (count columns)
                                            (get-in column-data [key :width]))}}
         [:span.reabledit-header-text value]
         [:div.reabledit-header-handle

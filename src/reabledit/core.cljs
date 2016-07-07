@@ -28,7 +28,9 @@
         (let [header-row-el (aget (dom/getElementsByClass
                                    "reabledit-header-row"
                                    (:main-el @state))
-                                  0)]
+                                  0)
+              column-keys (mapv :key columns)
+              row-ids (mapv #(get % primary-key) data)]
           [:div.reabledit
            [components/data-table-headers columns state]
            [:div.reabledit-data-rows-container
@@ -44,8 +46,9 @@
               ^{:key (get row-data primary-key)}
               [components/data-table-row
                columns
-               data
                primary-key
                row-change-fn
-               row-data
-               state])]]))})))
+               state
+               column-keys
+               row-ids
+               row-data])]]))})))
