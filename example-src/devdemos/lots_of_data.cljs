@@ -4,19 +4,19 @@
             [reabledit.components :as components])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
-(def rows 100)
-(def cols 30)
-
-(def example-keys (map #(-> % str keyword) (range 1 cols)))
-
 (defn generate-row
-  []
+  [id columns]
   (reduce
-   #(assoc %1 %2 (str (gensym "Some really long, long prefix")))
-   {} example-keys))
+   (fn [row column]
+     (assoc row (:key column) (str (gensym "Some really long, long prefix"))))
+   {:id id} columns))
 
-(def example-columns (mapv #(assoc {} :key % :value (str %)) example-keys))
-(def example-data (mapv generate-row (range 1 50)))
+(def row-count 100)
+(def column-count 30)
+
+(def example-columns (mapv #(assoc {} :key (str %) :value (str "Column " %))
+                           (range 1 column-count)))
+(def example-data (mapv #(generate-row % example-columns) (range 1 row-count)))
 
 (defonce example-atom (reagent/atom example-data))
 
@@ -24,13 +24,9 @@
   [nth-row old-row new-row]
   (swap! example-atom reabledit/update-row nth-row new-row))
 
-(defn data-table*
-  [data-atom]
-  [:div
-   {:style {:height "430px"}}
-   [reabledit/data-table example-columns @data-atom example-row-fn]])
-
 (defcard-rg reabledit
   (fn [data-atom _]
-    [data-table* data-atom])
+    [:div
+     {:style {:height "430px"}}
+     [reabledit/data-table example-columns @data-atom :id example-row-fn]])
   example-atom)

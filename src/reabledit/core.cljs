@@ -17,23 +17,19 @@
 ;;
 
 (defn data-table
-  [columns data row-change-fn]
+  [columns data primary-key row-change-fn]
   (let [state (reagent/atom {})]
     (reagent/create-class
      {:component-did-mount
       (fn [this]
         (swap! state assoc :main-el (reagent/dom-node this)))
       :reagent-render
-      (fn [columns data row-change-fn]
-        (let [rows (count data)
-              cols (count columns)
-              header-row-el (aget (dom/getElementsByClass
+      (fn [columns data primary-key row-change-fn]
+        (let [header-row-el (aget (dom/getElementsByClass
                                    "reabledit-header-row"
                                    (:main-el @state))
                                   0)]
           [:div.reabledit
-           ;; Uncomment for debugging
-           ;; [:pre (pr-str @state)]
            [components/data-table-headers columns state]
            [:div.reabledit-data-rows-container
             (if header-row-el
@@ -44,13 +40,12 @@
                             (when (= (.-currentTarget e) (.-target e))
                               (set! (.-scrollLeft header-row-el)
                                     (-> e .-target .-scrollLeft))))})
-            (for [[nth-row row-data] (map-indexed vector data)]
-              ^{:key nth-row}
+            (for [row-data data]
+              ^{:key (get row-data primary-key)}
               [components/data-table-row
                columns
+               data
+               primary-key
                row-change-fn
                row-data
-               nth-row
-               rows
-               cols
                state])]]))})))

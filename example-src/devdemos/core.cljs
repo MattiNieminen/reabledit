@@ -46,12 +46,14 @@
   [nth-row old-row new-row]
   (swap! example-atom reabledit/update-row nth-row new-row))
 
-(defn data-table*
-  [data-atom]
-  [reabledit/data-table example-columns @data-atom example-row-fn])
-
 (defcard-rg reabledit
   (fn [data-atom _]
-    [data-table* data-atom])
+    [:div
+     [:button
+      {:on-click (fn [e]
+                   (let [new-row-id (inc (apply max (map :id @data-atom)))]
+                     (swap! data-atom #(vec (cons {:id new-row-id} %)))))}
+      "Add row to top"]
+     [reabledit/data-table example-columns @data-atom :id example-row-fn]])
   example-atom
   {:inspect-data true})
