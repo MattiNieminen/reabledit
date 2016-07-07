@@ -138,7 +138,8 @@
                                                   column
                                                   column-key
                                                   row-id)
-      :on-click #(move-to-cell!)
+      :on-click #(if-not edited?
+                   (move-to-cell!))
       :on-double-click #(enable-edit!)}
      (if edited?
        [(or (:editor column) default-editor)
