@@ -144,12 +144,12 @@
      (if edited?
        [(or (:editor column) default-editor)
         (get-in @state [:edit :updated])
-        (:key column)
+        column-key
         #(swap! state assoc-in [:edit :updated] %)
         move-to-cell!]
        [(or (:view column) (string-view))
         row-data
-        (:key column)
+        column-key
         enable-edit!])]))
 
 (defn data-table-row
