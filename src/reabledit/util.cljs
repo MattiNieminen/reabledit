@@ -104,53 +104,49 @@
                 previous-row
                 next-row]}
         (move-candidates column-keys row-ids column-key row-id)
-        move-fn! (partial move-to-cell! row-change-fn state row-ids)]
+        move-fn! (fn [column row]
+                   (.preventDefault e)
+                   (move-to-cell! row-change-fn state row-ids column row))
+        enable-edit! (fn [& input]
+                       (.preventDefault e)
+                       (if input
+                         (enable-edit! state row-data column (first input))
+                         (enable-edit! state row-data column)))]
     (cond
 
       ;; CMD / CTRL -combinations, when edit mode is not enabled
       (and (not (:edit @state)) meta?)
-      (do
-        (.preventDefault e)
-        (case keycode
+      (case keycode
 
-          ;; Home selects the first cell
-          36 (move-fn! first-column first-row)
+        ;; Home selects the first cell
+        36 (move-fn! first-column first-row)
 
-          ;; Arrow keys move to the beginning of row or col
-          37 (move-fn! first-column current-row)
-          38 (move-fn! current-column first-row)
-          39 (move-fn! last-column current-row)
-          40 (move-fn! current-column last-row)
-          nil))
+        ;; Arrow keys move to the beginning of row or col
+        37 (move-fn! first-column current-row)
+        38 (move-fn! current-column first-row)
+        39 (move-fn! last-column current-row)
+        40 (move-fn! current-column last-row)
+        nil)
 
       ;; Home moves to the beginning of row if not in edit mode
       (and (not (:edit @state)) (= keycode 36))
-      (do
-        (.preventDefault e)
-        (move-fn! first-column current-row))
+      (move-fn! first-column current-row)
 
       ;; Shift + tab moves one cell backwards
       (and shift? (= keycode 9))
-      (do
-        (.preventDefault e)
-        (move-fn! previous-column current-row))
+      (move-fn! previous-column current-row)
 
       ;; Tab always moves one cell forward
       (= keycode 9)
-      (do
-        (.preventDefault e)
-        (move-fn! next-column current-row))
+      (move-fn! next-column current-row)
 
       ;; Enter in editing mode disables it and moves selection to cell under
       (and (:edit @state) (= keycode 13))
-      (do
-        (.preventDefault e)
-        (move-fn! current-column next-row))
+      (move-fn! current-column next-row)
 
       (nil? (:edit @state))
       (let [key (-> e .-key)
             from-charcode (.fromCharCode js/String keycode)]
-        (.preventDefault e)
         (cond
 
           ;; Arrow keys in navigation mode change the selected cell
@@ -160,19 +156,17 @@
           (= keycode 40) (move-fn! current-column next-row)
 
           ;; Enter and F2 in navigation mode enable editing mode
-          (= keycode 13) (enable-edit! state row-data column)
-          (= keycode 113) (enable-edit! state row-data column)
+          (= keycode 13) (enable-edit!)
+          (= keycode 113) (enable-edit!)
 
           ;; Most keycodes take the user to edit mode
-          (= (count key) 1) (enable-edit! state row-data column key)
+          (= (count key) 1) (enable-edit! key)
 
           ;; If key property was not available, do you best with keyCode
           (and from-charcode (re-matches #"\d|\w" from-charcode))
-          (enable-edit! column
-                        row-data
-                        state (if shift?
-                                from-charcode
-                                (.toLowerCase from-charcode)))
+          (enable-edit! (if shift?
+                          from-charcode
+                          (.toLowerCase from-charcode)))
 
           :else
           nil)))))
