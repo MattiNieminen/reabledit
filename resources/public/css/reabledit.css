@@ -75,6 +75,16 @@
   border: 0;
 }
 
+.reabledit-view-template {
+  position: relative;
+  z-index: 1;
+}
+
+.reabledit-focused {
+  position: absolute;
+  opacity: 0;
+}
+
 .reabledit-cell .coercion-error {
   background-color: #ffadbb;
   color: #d82a32;
@@ -91,6 +101,7 @@
 
 .reabledit-dropdown-items {
   position: absolute;
+  z-index: 2;
   margin-top: 10px;
   background-color: #fff;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);

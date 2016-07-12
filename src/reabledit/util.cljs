@@ -85,7 +85,13 @@
                        (selected-cell column-key row-id)))
 
   ;; Dirty as fudge, but what can you do with Reagent?
-  (.focus (.getElementById js/document (cell-id column-key row-id))))
+  ;; Need to wait that cell is certainly rendered
+  (js/setTimeout
+   #(.focus (aget (.getElementsByClassName
+                   (.getElementById js/document (cell-id column-key row-id))
+                   "reabledit-focused")
+                  0))
+   50))
 
 (defn default-handle-key-down
   [e row-change-fn state column-keys row-ids row-data column column-key row-id]
@@ -187,3 +193,15 @@
     (if scroll-el
       (- (.-offsetWidth scroll-el) (.-clientWidth scroll-el))
       0)))
+
+(defn default-copy
+  [e]
+  (js/console.log "Not yet implemented: copy"))
+
+(defn default-paste
+  [e]
+  (js/console.log "Not yet implemented: paste"))
+
+(defn default-cut
+  [e]
+  (js/console.log "Not yet implemented: cut"))

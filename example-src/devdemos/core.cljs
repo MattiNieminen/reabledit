@@ -20,11 +20,12 @@
     :value "Name (not the secret identity)"}
    {:key :age
     :value "Age"
-    :editor (components/int-editor)}
+    :editor components/int-editor}
    {:key :publisher
     :value "Publisher"
-    :view (components/dropdown-view example-options)
-    :editor (components/dropdown-editor example-options)}])
+    :view components/dropdown-view
+    :editor components/dropdown-editor
+    :opts {:options example-options}}])
 
 (def example-data
   [{:id 1

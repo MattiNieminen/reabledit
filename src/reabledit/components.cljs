@@ -8,57 +8,63 @@
 ;; Cell views
 ;;
 
-(defn string-view
-  []
-  (fn [row-data k _]
-    [:span (get row-data k)]))
+(defn view-template
+  ([v]
+   [view-template v util/default-copy util/default-paste util/default-cut])
+  ([v copy! paste! cut!]
+   [:div.reabledit-view-template
+    [:span v]
+    [:input.reabledit-focused {:on-copy copy!
+                               :on-paste paste!
+                               :on-cut cut!}]]))
+
+(defn default-view
+  [row-data k _ _]
+  [view-template (get row-data k)])
 
 (defn dropdown-view
-  [options]
-  (fn [row-data k _]
-    [:span (-> (filter #(= (:key %) (get row-data k)) options)
-               first
-               :value)]))
+  [row-data k _ {:keys [options]}]
+  [view-template (-> (filter #(= (:key %) (get row-data k)) options)
+                     first
+                     :value)])
 
 ;;
 ;; Cell editors
 ;;
 
-(defn string-editor
-  []
-  (fn [row-data k change-fn _]
-    [:input {:type "text"
-             :auto-focus true
-             :on-focus util/move-cursor-to-end!
-             :value (get row-data k)
-             :on-change #(change-fn (assoc row-data
-                                           k
-                                           (-> % .-target .-value)))}]))
+(defn default-editor
+  [row-data k change-fn _]
+  [:input {:type "text"
+           :auto-focus true
+           :on-focus util/move-cursor-to-end!
+           :value (get row-data k)
+           :on-change #(change-fn (assoc row-data
+                                         k
+                                         (-> % .-target .-value)))}])
 
 (defn int-coercable?
   [s]
   (re-matches #"\s*((0[,.]0*)|0|([1-9][0-9]*)([.,]0*)?)\s*" s))
 
 (defn int-editor
-  []
-  (fn [row-data k change-fn _]
-    (let [initial-value (get row-data k)
-          input (reagent/atom (str initial-value))]
-      (fn [row-data k change-fn _]
-        [:input {:type "text"
-                 :auto-focus true
-                 :on-focus util/move-cursor-to-end!
-                 :value @input
-                 :class (if-not (int-coercable? @input) "coercion-error")
-                 :on-change (fn [e]
-                              (let [new-input (-> e .-target .-value)
-                                    new-value (if (int-coercable? new-input)
-                                                (js/parseInt new-input)
-                                                initial-value)]
-                                (reset! input new-input)
-                                (change-fn (assoc row-data
-                                                  k
-                                                  new-value))))}]))))
+  [row-data k change-fn _]
+  (let [initial-value (get row-data k)
+        input (reagent/atom (str initial-value))]
+    (fn [row-data k change-fn _]
+      [:input {:type "text"
+               :auto-focus true
+               :on-focus util/move-cursor-to-end!
+               :value @input
+               :class (if-not (int-coercable? @input) "coercion-error")
+               :on-change (fn [e]
+                            (let [new-input (-> e .-target .-value)
+                                  new-value (if (int-coercable? new-input)
+                                              (js/parseInt new-input)
+                                              initial-value)]
+                              (reset! input new-input)
+                              (change-fn (assoc row-data
+                                                k
+                                                new-value))))}])))
 
 (defn- dropdown-editor-key-down
   [e v change-fn options]
@@ -79,32 +85,29 @@
       nil)))
 
 (defn dropdown-editor
-  [options]
-  (fn [row-data k change-fn disable-edit!]
-    (reagent/create-class
-     {:component-did-mount #(.focus (reagent/dom-node %))
-      :reagent-render
-      (fn [row-data k change-fn disable-edit!]
-        (let [v (get row-data k)
-              change-fn #(change-fn (assoc row-data k %))]
-          [:div.reabledit-dropdown
-           {:tabIndex 0
-            :on-key-down #(dropdown-editor-key-down % v change-fn options)}
-           [:span (-> (filter #(= (:key %) v) options)
-                      first
-                      :value)]
-           [:div.reabledit-dropdown-items
-            (for [{:keys [key value]} options]
-              ^{:key key}
-              [:div.reabledit-dropdown-item
-               {:class (if (= key v) "selected")
-                :on-click (fn [e]
-                            (.stopPropagation e)
-                            (change-fn key)
-                            (disable-edit!))}
-               [:span value]])]]))})))
-
-(defonce default-editor (string-editor))
+  [row-data k change-fn disable-edit! {:keys [options]}]
+  (reagent/create-class
+   {:component-did-mount #(.focus (reagent/dom-node %))
+    :reagent-render
+    (fn [row-data k change-fn disable-edit!]
+      (let [v (get row-data k)
+            change-fn #(change-fn (assoc row-data k %))]
+        [:div.reabledit-dropdown
+         {:tabIndex 0
+          :on-key-down #(dropdown-editor-key-down % v change-fn options)}
+         [:span (-> (filter #(= (:key %) v) options)
+                    first
+                    :value)]
+         [:div.reabledit-dropdown-items
+          (for [{:keys [key value]} options]
+            ^{:key key}
+            [:div.reabledit-dropdown-item
+             {:class (if (= key v) "selected")
+              :on-click (fn [e]
+                          (.stopPropagation e)
+                          (change-fn key)
+                          (disable-edit!))}
+             [:span value]])]]))}))
 
 ;;
 ;; Dependencies for the main component
@@ -146,11 +149,13 @@
         (get-in @state [:edit :updated])
         column-key
         #(swap! state assoc-in [:edit :updated] %)
-        move-to-cell!]
-       [(or (:view column) (string-view))
+        move-to-cell!
+        (:opts column)]
+       [(or (:view column) default-view)
         row-data
         column-key
-        enable-edit!])]))
+        enable-edit!
+        (:opts column)])]))
 
 (defn data-table-row
   [columns primary-key row-change-fn state column-keys row-ids row-data]
