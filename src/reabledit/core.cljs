@@ -26,14 +26,14 @@
       :reagent-render
       (fn [columns data primary-key row-change-fn]
         (let [header-row-el (aget (dom/getElementsByClass
-                                   "reabledit-header-row"
+                                   "reabledit-row--header"
                                    (:main-el @state))
                                   0)
               column-keys (mapv :key columns)
               row-ids (mapv #(get % primary-key) data)]
           [:div.reabledit
            [components/data-table-headers columns state]
-           [:div.reabledit-data-rows-container
+           [:div.reabledit-data-rows
             (if header-row-el
               {:style {:height (str "calc(100% - "
                                     (.-clientHeight header-row-el)

@@ -1,9 +1,13 @@
+/* Main container */
+
 .reabledit {
   overflow: hidden;
   height: 100%;
   border-top: 1px solid #ddd;
   border-right: 1px solid #ddd;
 }
+
+/* Full-screen area dragging header resize handles */
 
 .reabledit-resize-area {
   position: fixed;
@@ -13,38 +17,23 @@
   right: 0;
 }
 
+/* Container for data rows */
+
+.reabledit-data-rows {
+  overflow: auto;
+}
+
+/* Rows, their items and modifiers */
+
 .reabledit-row {
   display: flex;
 }
 
-.reabledit-header-row {
+.reabledit-row--header {
   overflow: hidden;
 }
 
-.reabledit-header {
-  background-color: #f3f3f3 !important;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-}
-
-.reabledit-header-text {
-  overflow: hidden;
-}
-
-.reabledit-header-handle {
-  flex: 0 0 5px;
-  cursor: ew-resize;
-}
-
-.reabledit-header-scroll {
-  background-color: #f3f3f3 !important;
-  border-bottom: 1px solid #ddd;
-}
-
-.reabledit-data-rows-container {
-  overflow: auto;
-}
+/* Cells, their items and modifiers */
 
 .reabledit-cell {
   flex: 0 0 auto;
@@ -57,16 +46,51 @@
   overflow: hidden;
 }
 
-.reabledit-cell.selected {
+.reabledit-cell--selected {
   background-color: #f9f9f9;
   border: 1px solid #4ca2d8;
 }
 
-.reabledit-cell span {
+.reabledit-cell--header {
+  background-color: #f3f3f3 !important;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+
+.reabledit-cell__content {
   padding-left: 7px;
 }
 
-.reabledit-cell input {
+.reabledit-cell__content--header {
+  overflow: hidden;
+}
+
+.reabledit-cell__header-handle {
+  flex: 0 0 5px;
+  cursor: ew-resize;
+}
+
+.reabledit-cell__header-scroll {
+  background-color: #f3f3f3 !important;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Views, their items and modifiers */
+
+.reabledit-cell-view {
+  position: relative;
+  z-index: 1;
+}
+
+.reabledit-cell-view__hidden-input-handler {
+  position: absolute;
+  opacity: 0;
+}
+
+/* Cell editors, their items and modifiers */
+
+.reabledit-cell-editor-input {
   width: 100%;
   height: 100%;
   padding-left: 6px;
@@ -75,31 +99,21 @@
   border: 0;
 }
 
-.reabledit-view-template {
-  position: relative;
-  z-index: 1;
-}
-
-.reabledit-focused {
-  position: absolute;
-  opacity: 0;
-}
-
-.reabledit-cell .coercion-error {
+.reabledit-cell-editor-input--error {
   background-color: #ffadbb;
   color: #d82a32;
 }
 
-.reabledit-dropdown {
+.reabledit-cell-editor-dropdown {
   position: absolute;
   width: inherit;
 }
 
-.reabledit-dropdown:focus {
+.reabledit-cell-editor-dropdown:focus {
   outline: none;
 }
 
-.reabledit-dropdown-items {
+.reabledit-cell-editor-dropdown-list {
   position: absolute;
   z-index: 2;
   margin-top: 10px;
@@ -108,13 +122,13 @@
   width: 100%;
 }
 
-.reabledit-dropdown-item {
+.reabledit-cell-editor-dropdown-list__item {
   display: flex;
   align-items: center;
   height: 30px;
 }
 
-.reabledit-dropdown-item.selected {
-    background-color: #4ca2d8;
-    color: #fff;
+.reabledit-cell-editor-dropdown-list__item--selected {
+  background-color: #4ca2d8;
+  color: #fff;
 }

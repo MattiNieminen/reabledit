@@ -5,7 +5,7 @@
 
 (defn header-id
   [k]
-  (str "reabledit-header-" (name k)))
+  (str "reabledit-cell--header-" (name k)))
 
 (defn cell-id
   [column-key row-id]
@@ -187,7 +187,7 @@
 (defn vertical-scrollbar-size
   [main-el]
   (let [scroll-el (aget (dom/getElementsByClass
-                         "reabledit-data-rows-container"
+                         "reabledit-data-rows"
                          main-el)
                         0)]
     (if scroll-el
