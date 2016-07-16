@@ -194,6 +194,24 @@
       (- (.-offsetWidth scroll-el) (.-clientWidth scroll-el))
       0)))
 
+(defn start-resize!
+  [e k state]
+  (swap! state assoc :resize k)
+  (.setData (.-dataTransfer e) "Text" (name k))
+  (set! (-> e .-dataTransfer .-effectAllowed) "move"))
+
+(defn stop-resize!
+  [state]
+  (swap! state dissoc :resize))
+
+(defn resize!
+  [e state]
+  (let [k (:resize @state)
+        element (.getElementById js/document (header-id k))
+        width (- (.-pageX e) (.-left (.getBoundingClientRect element)))]
+    (swap! state assoc-in [:columns k :width] width)))
+
+
 (defn default-copy
   [e]
   (js/console.log "Not yet implemented: copy"))

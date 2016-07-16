@@ -177,23 +177,6 @@
       row-data
       column])])
 
-(defn start-resize!
-  [e k state]
-  (swap! state assoc :resize k)
-  (.setData (.-dataTransfer e) "Text" (name k))
-  (set! (-> e .-dataTransfer .-effectAllowed) "move"))
-
-(defn stop-resize!
-  [state]
-  (swap! state dissoc :resize))
-
-(defn resize!
-  [e state]
-  (let [k (:resize @state)
-        element (.getElementById js/document (util/header-id k))
-        width (- (.-pageX e) (.-left (.getBoundingClientRect element)))]
-    (swap! state assoc-in [:columns k :width] width)))
-
 (defn data-table-headers
   [columns state]
   (let [column-data (:columns @state)
@@ -203,10 +186,10 @@
        [:div.reabledit-resize-area
         {:on-drag-over (fn [e]
                          (.preventDefault e)
-                         (resize! e state))
+                         (util/resize! e state))
          :on-drop (fn [e]
                     (.preventDefault e)
-                    (stop-resize! state))}])
+                    (util/stop-resize! state))}])
      (for [{:keys [key value]} columns]
        ^{:key key}
        [:div.reabledit-cell.reabledit-cell--header
@@ -216,8 +199,8 @@
         [:span.reabledit-cell__content.reabledit-cell__content--header value]
         [:div.reabledit-cell__header-handle
          {:draggable true
-          :on-drag-start #(start-resize! % key state)
-          :on-drag-end #(stop-resize! state)}]])
+          :on-drag-start #(util/start-resize! % key state)
+          :on-drag-end #(util/stop-resize! state)}]])
      (if (> scrollbar-size 0)
        [:div.reabledit-cell__header-scroll
         {:style {:min-width (str scrollbar-size "px")}}])]))
