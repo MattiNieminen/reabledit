@@ -56,31 +56,29 @@
                                   k
                                   (-> % .-target .-value)))}])
 
-(defn int-coercable?
-  [s]
-  (re-matches #"\s*((0[,.]0*)|0|([1-9][0-9]*)([.,]0*)?)\s*" s))
-
 (defn int-editor
   [initial-row-data edited-row-data k change-fn _]
-  (let [initial-value (get edited-row-data k)
-        input (reagent/atom (str initial-value))]
+  (let [initial-value (get initial-row-data k)
+        input-candidate (str (get edited-row-data k))
+        input (reagent/atom input-candidate)]
+    (change-fn (assoc edited-row-data
+                      k
+                      (util/parse-int input-candidate initial-value)))
     (fn [initial-row-data edited-row-data k change-fn _]
       [:input.reabledit-cell-editor-input
        {:type "text"
-        :class (if-not (int-coercable? @input)
+        :class (if-not (util/int-coercable? @input)
                  "reabledit-cell-editor-input--error")
         :auto-focus true
         :on-focus util/move-cursor-to-end!
         :value @input
         :on-change (fn [e]
-                     (let [new-input (-> e .-target .-value)
-                           new-value (if (int-coercable? new-input)
-                                       (js/parseInt new-input)
-                                       initial-value)]
+                     (let [new-input (-> e .-target .-value)]
                        (reset! input new-input)
                        (change-fn (assoc edited-row-data
                                          k
-                                         new-value))))}])))
+                                         (util/parse-int new-input
+                                                         initial-value)))))}])))
 
 (defn- dropdown-editor-key-down
   [e v change-fn options]

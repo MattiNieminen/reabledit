@@ -29,6 +29,16 @@
     (str (max min-column-width width) "px")
     (str (/ 100 column-count) "%")))
 
+(defn int-coercable?
+  [s]
+  (re-matches #"\s*((0[,.]0*)|0|([1-9][0-9]*)([.,]0*)?)\s*" s))
+
+(defn parse-int
+  [s fallback]
+  (if (int-coercable? s)
+    (js/parseInt s)
+    fallback))
+
 (defn enable-edit!
   ([state row-data column]
    (enable-edit! state row-data column nil))
