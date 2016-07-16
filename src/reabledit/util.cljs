@@ -32,12 +32,15 @@
 (defn enable-edit!
   ([state row-data column]
    (enable-edit! state row-data column nil))
-  ([state row-data column input]
+  ([state row-data column input-candidate]
    (when-not (:disable-edit column)
-     (swap! state assoc :edit {:initial row-data
-                               :updated (if input
-                                          (assoc row-data (:key column) input)
-                                          row-data)}))))
+     (swap! state
+            assoc
+            :edit
+            {:initial row-data
+             :updated (if input-candidate
+                        (assoc row-data (:key column) input-candidate)
+                        row-data)}))))
 
 (defn find-index [coll v]
   (first (keep-indexed #(if (= %2 v) %1) coll)))
@@ -113,11 +116,9 @@
         move-fn! (fn [column row]
                    (.preventDefault e)
                    (move-to-cell! row-change-fn state row-ids column row))
-        enable-edit! (fn [& input]
+        enable-edit! (fn []
                        (.preventDefault e)
-                       (if input
-                         (enable-edit! state row-data column (first input))
-                         (enable-edit! state row-data column)))]
+                       (enable-edit! state row-data column))]
     (cond
 
       ;; CMD / CTRL -combinations, when edit mode is not enabled
@@ -164,15 +165,6 @@
           ;; Enter and F2 in navigation mode enable editing mode
           (= keycode 13) (enable-edit!)
           (= keycode 113) (enable-edit!)
-
-          ;; Most keycodes take the user to edit mode
-          (= (count key) 1) (enable-edit! key)
-
-          ;; If key property was not available, do you best with keyCode
-          (and from-charcode (re-matches #"\d|\w" from-charcode))
-          (enable-edit! (if shift?
-                          from-charcode
-                          (.toLowerCase from-charcode)))
 
           :else
           nil)))))

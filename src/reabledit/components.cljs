@@ -8,26 +8,38 @@
 ;; Cell views
 ;;
 
-(defn view-template
-  ([v]
-   [view-template v util/default-copy util/default-paste util/default-cut])
-  ([v copy! paste! cut!]
-   [:div.reabledit-cell-view
-    [:span.reabledit-cell__content v]
-    [:input.reabledit-cell-view__hidden-input-handler.reabledit-focused
-     {:on-copy copy!
-      :on-paste paste!
-      :on-cut cut!}]]))
-
 (defn default-view
-  [row-data k _ _]
-  [view-template (get row-data k)])
+  [row-data k enable-edit! _]
+  [:div.reabledit-cell-view
+   [:span.reabledit-cell__content
+    (get row-data k)]
+   [:input.reabledit-cell-view__hidden-input-handler.reabledit-focused
+    {:value nil
+     :on-change #(enable-edit! (-> % .-target .-value))
+     :on-copy util/default-copy
+     :on-paste util/default-paste
+     :on-cut util/default-cut}]])
 
 (defn dropdown-view
-  [row-data k _ {:keys [options]}]
-  [view-template (-> (filter #(= (:key %) (get row-data k)) options)
-                     first
-                     :value)])
+  [row-data k enable-edit! {:keys [options]}]
+  [:div.reabledit-cell-view
+   [:span.reabledit-cell__content
+    (-> (filter #(= (:key %) (get row-data k)) options)
+        first
+        :value)]
+   [:input.reabledit-cell-view__hidden-input-handler.reabledit-focused
+    {:value nil
+     :on-change (fn [e]
+                  (let [input (str/lower-case (-> e .-target .-value))]
+                    (-> (filter #(str/starts-with? (str/lower-case (:value %))
+                                                   input)
+                                options)
+                        first
+                        :key
+                        enable-edit!)))
+     :on-copy util/default-copy
+     :on-paste util/default-paste
+     :on-cut util/default-cut}]])
 
 ;;
 ;; Cell editors
@@ -127,7 +139,7 @@
                                                           state
                                                           column-key
                                                           row-id)
-        enable-edit! #(util/enable-edit! state row-data column)
+        enable-edit! (partial util/enable-edit! state row-data column)
         move-to-cell! #(util/move-to-cell! row-change-fn
                                            state
                                            row-ids
