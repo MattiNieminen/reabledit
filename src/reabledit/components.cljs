@@ -46,13 +46,13 @@
 ;;
 
 (defn default-editor
-  [row-data k change-fn _]
+  [_ edited-row-data k change-fn _]
   [:input.reabledit-cell-editor-input
    {:type "text"
     :auto-focus true
     :on-focus util/move-cursor-to-end!
-    :value (get row-data k)
-    :on-change #(change-fn (assoc row-data
+    :value (get edited-row-data k)
+    :on-change #(change-fn (assoc edited-row-data
                                   k
                                   (-> % .-target .-value)))}])
 
@@ -61,10 +61,10 @@
   (re-matches #"\s*((0[,.]0*)|0|([1-9][0-9]*)([.,]0*)?)\s*" s))
 
 (defn int-editor
-  [row-data k change-fn _]
-  (let [initial-value (get row-data k)
+  [initial-row-data edited-row-data k change-fn _]
+  (let [initial-value (get edited-row-data k)
         input (reagent/atom (str initial-value))]
-    (fn [row-data k change-fn _]
+    (fn [initial-row-data edited-row-data k change-fn _]
       [:input.reabledit-cell-editor-input
        {:type "text"
         :class (if-not (int-coercable? @input)
@@ -78,7 +78,7 @@
                                        (js/parseInt new-input)
                                        initial-value)]
                        (reset! input new-input)
-                       (change-fn (assoc row-data
+                       (change-fn (assoc edited-row-data
                                          k
                                          new-value))))}])))
 
@@ -101,13 +101,13 @@
       nil)))
 
 (defn dropdown-editor
-  [row-data k change-fn disable-edit! {:keys [options]}]
+  [_ edited-row-data k change-fn disable-edit! {:keys [options]}]
   (reagent/create-class
    {:component-did-mount #(.focus (reagent/dom-node %))
     :reagent-render
-    (fn [row-data k change-fn disable-edit!]
-      (let [v (get row-data k)
-            change-fn #(change-fn (assoc row-data k %))]
+    (fn [_ edited-row-data k change-fn disable-edit! {:keys [options]}]
+      (let [v (get edited-row-data k)
+            change-fn #(change-fn (assoc edited-row-data k %))]
         [:div.reabledit-cell-editor-dropdown
          {:tabIndex 0
           :on-key-down #(dropdown-editor-key-down % v change-fn options)}
@@ -164,6 +164,7 @@
       :on-double-click #(enable-edit!)}
      (if edited?
        [(or (:editor column) default-editor)
+        row-data
         (get-in @state [:edit :updated])
         column-key
         #(swap! state assoc-in [:edit :updated] %)
