@@ -137,12 +137,15 @@
                                                           state
                                                           column-key
                                                           row-id)
-        enable-edit! (partial util/enable-edit! state row-data column)
-        move-to-cell! #(util/move-to-cell! row-change-fn
+        enable-edit-in-this-cell! (partial util/enable-edit!
                                            state
-                                           row-ids
-                                           column-key
-                                           row-id)]
+                                           row-data
+                                           column)
+        disable-edit-and-select-this-cell! #(util/move-to-cell! row-change-fn
+                                                                state
+                                                                row-ids
+                                                                column-key
+                                                                row-id)]
     [:div.reabledit-cell
      {:id (util/cell-id column-key row-id)
       :class (if selected? "reabledit-cell--selected")
@@ -157,20 +160,20 @@
                                                   column-key
                                                   row-id)
       :on-click #(if-not edited?
-                   (move-to-cell!))
-      :on-double-click #(enable-edit!)}
+                   (disable-edit-and-select-this-cell!))
+      :on-double-click #(enable-edit-in-this-cell!)}
      (if edited?
        [(or (:editor column) default-editor)
         row-data
         (get-in @state [:edit :updated])
         column-key
         #(swap! state assoc-in [:edit :updated] %)
-        move-to-cell!
+        disable-edit-and-select-this-cell!
         (:opts column)]
        [(or (:view column) default-view)
         row-data
         column-key
-        enable-edit!
+        enable-edit-in-this-cell!
         (:opts column)])]))
 
 (defn data-table-row
