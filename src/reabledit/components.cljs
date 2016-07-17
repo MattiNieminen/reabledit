@@ -146,7 +146,6 @@
     [:div.reabledit-cell
      {:id (util/cell-id column-key row-id)
       :class (if selected? "reabledit-cell--selected")
-      :tabIndex 0
       :style {:width (util/column-width (count column-keys) width)}
       :on-key-down #(util/default-handle-key-down %
                                                   row-change-fn
