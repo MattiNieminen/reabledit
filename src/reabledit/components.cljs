@@ -46,25 +46,26 @@
 ;;
 
 (defn default-editor
-  [_ edited-row-data k change-fn _]
+  [_ edited-row-data k change-edited! _]
   [:input.reabledit-cell-editor-input
    {:type "text"
     :auto-focus true
     :on-focus util/move-cursor-to-end!
     :value (get edited-row-data k)
-    :on-change #(change-fn (assoc edited-row-data
+    :on-change #(change-edited! (assoc edited-row-data
                                   k
                                   (-> % .-target .-value)))}])
 
 (defn int-editor
-  [initial-row-data edited-row-data k change-fn _]
+  [initial-row-data edited-row-data k change-edited! _]
   (let [initial-value (get initial-row-data k)
         input-candidate (str (get edited-row-data k))
+        parsed (util/parse-int input-candidate initial-value)
         input (reagent/atom input-candidate)]
-    (change-fn (assoc edited-row-data
-                      k
-                      (util/parse-int input-candidate initial-value)))
-    (fn [initial-row-data edited-row-data k change-fn _]
+    (change-edited! (assoc edited-row-data
+                           k
+                           parsed))
+    (fn [initial-row-data edited-row-data k change-edited! _]
       [:input.reabledit-cell-editor-input
        {:type "text"
         :class (if-not (util/int-coercable? @input)
@@ -73,15 +74,15 @@
         :on-focus util/move-cursor-to-end!
         :value @input
         :on-change (fn [e]
-                     (let [new-input (-> e .-target .-value)]
+                     (let [new-input (-> e .-target .-value)
+                           parsed (util/parse-int new-input initial-value)]
                        (reset! input new-input)
-                       (change-fn (assoc edited-row-data
-                                         k
-                                         (util/parse-int new-input
-                                                         initial-value)))))}])))
+                       (change-edited! (assoc edited-row-data
+                                              k
+                                              parsed))))}])))
 
 (defn- dropdown-editor-key-down
-  [e v change-fn options]
+  [e v change-edited! options]
   (let [keycode (.-keyCode e)
         position (first (keep-indexed #(if (= %2 v) %1)
                                       (map :key options)))]
@@ -89,26 +90,26 @@
       38 (do
            (.preventDefault e)
            (if (zero? position)
-             (change-fn (-> options last :key))
-             (change-fn (:key (nth options (dec position))))))
+             (change-edited! (-> options last :key))
+             (change-edited! (:key (nth options (dec position))))))
       40 (do
            (.preventDefault e)
            (if (= position (-> options count dec))
-             (change-fn (-> options first :key))
-             (change-fn (:key (nth options (inc position))))))
+             (change-edited! (-> options first :key))
+             (change-edited! (:key (nth options (inc position))))))
       nil)))
 
 (defn dropdown-editor
-  [_ edited-row-data k change-fn disable-edit! {:keys [options]}]
+  [_ edited-row-data k change-edited! disable-edit! {:keys [options]}]
   (reagent/create-class
    {:component-did-mount #(.focus (reagent/dom-node %))
     :reagent-render
-    (fn [_ edited-row-data k change-fn disable-edit! {:keys [options]}]
+    (fn [_ edited-row-data k change-edited! disable-edit! {:keys [options]}]
       (let [v (get edited-row-data k)
-            change-fn #(change-fn (assoc edited-row-data k %))]
+            change-edited! #(change-edited! (assoc edited-row-data k %))]
         [:div.reabledit-cell-editor-dropdown
          {:tabIndex 0
-          :on-key-down #(dropdown-editor-key-down % v change-fn options)}
+          :on-key-down #(dropdown-editor-key-down % v change-edited! options)}
          [:span.reabledit-cell__content
           (-> (filter #(= (:key %) v) options)
               first
@@ -121,7 +122,7 @@
                        "reabledit-cell-editor-dropdown-list__item--selected")
               :on-click (fn [e]
                           (.stopPropagation e)
-                          (change-fn key)
+                          (change-edited! key)
                           (disable-edit!))}
              [:span.reabledit-cell__content value]])]]))}))
 
