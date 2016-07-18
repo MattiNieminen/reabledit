@@ -39,6 +39,11 @@
     (js/parseInt s)
     fallback))
 
+(defn find-in
+  [coll match-fn v]
+  (-> (filter #(match-fn % v) coll)
+      first))
+
 (defn enable-edit!
   ([state row-data column]
    (enable-edit! state row-data column nil))
@@ -213,15 +218,12 @@
         width (- (.-pageX e) (.-left (.getBoundingClientRect element)))]
     (swap! state assoc-in [:columns k :width] width)))
 
-
-(defn default-copy
+(defn get-clipboard-data
   [e]
-  (js/console.log "Not yet implemented: copy"))
+  (.preventDefault e)
+  (.getData (.-clipboardData e) "text/plain"))
 
-(defn default-paste
-  [e]
-  (js/console.log "Not yet implemented: paste"))
-
-(defn default-cut
-  [e]
-  (js/console.log "Not yet implemented: cut"))
+(defn set-clipboard-data
+  [e v]
+  (.preventDefault e)
+  (.setData (.-clipboardData e) "text/plain" v))

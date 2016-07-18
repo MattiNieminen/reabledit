@@ -9,37 +9,47 @@
 ;;
 
 (defn default-view
-  [row-data k _ enable-edit! _]
-  [:div.reabledit-cell-view
-   [:span.reabledit-cell__content
-    (get row-data k)]
-   [:input.reabledit-cell-view__hidden-input-handler.reabledit-focused
-    {:value nil
-     :on-change #(enable-edit! (-> % .-target .-value))
-     :on-copy util/default-copy
-     :on-paste util/default-paste
-     :on-cut util/default-cut}]])
+  [row-data k change-directly! enable-edit! _]
+  (let [v (get row-data k)]
+    [:div.reabledit-cell-view
+     [:span.reabledit-cell__content
+      v]
+     [:input.reabledit-cell-view__hidden-input-handler.reabledit-focused
+      {:value nil
+       :on-change #(enable-edit! (-> % .-target .-value))
+       :on-copy #(util/set-clipboard-data % v)
+       :on-paste #(change-directly! (assoc row-data
+                                           k
+                                           (util/get-clipboard-data %)))
+       :on-cut (fn [e]
+                 (util/set-clipboard-data e v)
+                 (change-directly! (assoc row-data k nil)))}]]))
 
 (defn dropdown-view
-  [row-data k _ enable-edit! {:keys [options]}]
-  [:div.reabledit-cell-view
-   [:span.reabledit-cell__content
-    (-> (filter #(= (:key %) (get row-data k)) options)
-        first
-        :value)]
-   [:input.reabledit-cell-view__hidden-input-handler.reabledit-focused
-    {:value nil
-     :on-change (fn [e]
-                  (let [input (str/lower-case (-> e .-target .-value))]
-                    (-> (filter #(str/starts-with? (str/lower-case (:value %))
-                                                   input)
-                                options)
-                        first
-                        :key
-                        enable-edit!)))
-     :on-copy util/default-copy
-     :on-paste util/default-paste
-     :on-cut util/default-cut}]])
+  [row-data k change-directly! enable-edit! {:keys [options]}]
+  (let [v (-> (filter #(= (:key %) (get row-data k)) options)
+              first
+              :value)]
+    [:div.reabledit-cell-view
+     [:span.reabledit-cell__content
+      v]
+     [:input.reabledit-cell-view__hidden-input-handler.reabledit-focused
+      {:value nil
+       :on-change (fn [e]
+                    (let [input (str/lower-case (-> e .-target .-value))
+                          match-fn #(str/starts-with? (-> %1
+                                                          :value
+                                                          str/lower-case)
+                                                      %2)
+                          o (util/find-in options match-fn input)]
+                      (enable-edit! (:key o))))
+       :on-copy #(util/set-clipboard-data % v)
+       :on-paste (fn [e]
+                   (let [input (str/lower-case (util/get-clipboard-data e))
+                         match-fn #(= (-> %1 :value str/lower-case) %2)
+                         o (util/find-in options match-fn input)]
+                     (change-directly! (assoc row-data k (:key o)))))
+       :on-cut #(util/set-clipboard-data % v)}]]))
 
 ;;
 ;; Cell editors
