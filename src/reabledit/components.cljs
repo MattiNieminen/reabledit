@@ -9,7 +9,7 @@
 ;;
 
 (defn default-view
-  [row-data k enable-edit! _]
+  [row-data k _ enable-edit! _]
   [:div.reabledit-cell-view
    [:span.reabledit-cell__content
     (get row-data k)]
@@ -21,7 +21,7 @@
      :on-cut util/default-cut}]])
 
 (defn dropdown-view
-  [row-data k enable-edit! {:keys [options]}]
+  [row-data k _ enable-edit! {:keys [options]}]
   [:div.reabledit-cell-view
    [:span.reabledit-cell__content
     (-> (filter #(= (:key %) (get row-data k)) options)
@@ -46,7 +46,7 @@
 ;;
 
 (defn default-editor
-  [_ edited-row-data k change-edited! _]
+  [_ edited-row-data k change-edited! _ _]
   [:input.reabledit-cell-editor-input
    {:type "text"
     :auto-focus true
@@ -57,7 +57,7 @@
                                   (-> % .-target .-value)))}])
 
 (defn int-editor
-  [initial-row-data edited-row-data k change-edited! _]
+  [initial-row-data edited-row-data k change-edited! _ _]
   (let [initial-value (get initial-row-data k)
         input-candidate (str (get edited-row-data k))
         parsed (util/parse-int input-candidate initial-value)
@@ -65,7 +65,7 @@
     (change-edited! (assoc edited-row-data
                            k
                            parsed))
-    (fn [initial-row-data edited-row-data k change-edited! _]
+    (fn [initial-row-data edited-row-data k change-edited! _ _]
       [:input.reabledit-cell-editor-input
        {:type "text"
         :class (if-not (util/int-coercable? @input)
@@ -100,11 +100,11 @@
       nil)))
 
 (defn dropdown-editor
-  [_ edited-row-data k change-edited! disable-edit! {:keys [options]}]
+  [_ edited-row-data k change-edited! _ disable-edit! {:keys [options]}]
   (reagent/create-class
    {:component-did-mount #(.focus (reagent/dom-node %))
     :reagent-render
-    (fn [_ edited-row-data k change-edited! disable-edit! {:keys [options]}]
+    (fn [_ edited-row-data k change-edited! _ disable-edit! {:keys [options]}]
       (let [v (get edited-row-data k)
             change-edited! #(change-edited! (assoc edited-row-data k %))]
         [:div.reabledit-cell-editor-dropdown
@@ -138,6 +138,9 @@
                                                           state
                                                           column-key
                                                           row-id)
+        change-this-row! (partial row-change-fn
+                                  (util/find-index row-ids row-id)
+                                  row-data)
         enable-edit-in-this-cell! (partial util/enable-edit!
                                            state
                                            row-data
@@ -169,11 +172,13 @@
         (get-in @state [:edit :updated])
         column-key
         #(swap! state assoc-in [:edit :updated] %)
+        change-this-row!
         disable-edit-and-select-this-cell!
         (:opts column)]
        [(or (:view column) default-view)
         row-data
         column-key
+        change-this-row!
         enable-edit-in-this-cell!
         (:opts column)])]))
 
