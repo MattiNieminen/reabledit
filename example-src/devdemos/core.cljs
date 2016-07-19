@@ -14,8 +14,7 @@
 
 (def example-columns
   [{:key :id
-    :value "ID"
-    :disable-edit true}
+    :value "ID"}
    {:key :name
     :value "Name (not the secret identity)"}
    {:key :age
