@@ -1,8 +1,9 @@
 (ns reabledit.components
   (:require [reabledit.util :as util]
             [reagent.core :as reagent]
-            [reagent.ratom :refer-macros [reaction]]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [goog.dom.classlist :as classlist]
+            [goog.dom :as dom]))
 
 ;;
 ;; Cell views
@@ -16,7 +17,7 @@
       v]
      [:input.reabledit-cell-view__hidden-input-handler.reabledit-focused
       {:value nil
-       :on-change #(enable-edit! (-> % .-target .-value))
+       :on-change #(enable-edit! (assoc row-data k (-> % .-target .-value)))
        :on-copy #(util/set-clipboard-data % v)
        :on-paste #(change-directly! (assoc row-data
                                            k
@@ -42,7 +43,7 @@
                                                           str/lower-case)
                                                       %2)
                           o (util/find-in options match-fn input)]
-                      (enable-edit! (:key o))))
+                      (enable-edit! (assoc row-data k (:key o)))))
        :on-copy #(util/set-clipboard-data % v)
        :on-paste (fn [e]
                    (let [input (str/lower-case (util/get-clipboard-data e))
@@ -143,55 +144,56 @@
 (defn data-table-cell
   [{:keys [primary-key row-change-fn state
            column-keys row-ids row-data column]}]
-  (let [column-key (:key column)
-        row-id (get row-data primary-key)
-        {:keys [selected? edited? width]} @(reagent/track util/cell-info
-                                                          state
-                                                          column-key
-                                                          row-id)
-        change-this-row! (partial row-change-fn
-                                  (util/find-index row-ids row-id)
-                                  row-data)
-        enable-edit-in-this-cell! (partial util/enable-edit!
-                                           state
-                                           row-data
-                                           column)
-        disable-edit-and-select-this-cell! #(util/move-to-cell! row-change-fn
-                                                                state
-                                                                row-ids
-                                                                column-key
-                                                                row-id)]
-    [:div.reabledit-cell
-     {:id (util/cell-id column-key row-id)
-      :class (if selected? "reabledit-cell--selected")
-      :style {:width (util/column-width (count column-keys) width)}
-      :on-key-down #(util/default-handle-key-down %
-                                                  row-change-fn
-                                                  state
-                                                  column-keys
-                                                  row-ids
-                                                  row-data
-                                                  column
-                                                  column-key
-                                                  row-id)
-      :on-click #(if-not edited?
-                   (disable-edit-and-select-this-cell!))
-      :on-double-click #(enable-edit-in-this-cell!)}
-     (if edited?
-       [(or (:editor column) default-editor)
-        row-data
-        (get-in @state [:edit :updated])
-        column-key
-        #(swap! state assoc-in [:edit :updated] %)
-        change-this-row!
-        disable-edit-and-select-this-cell!
-        (:opts column)]
-       [(or (:view column) default-view)
-        row-data
-        column-key
-        change-this-row!
-        enable-edit-in-this-cell!
-        (:opts column)])]))
+  (reagent/create-class
+   {:component-did-update
+    (fn [this _]
+      (if (classlist/contains (reagent/dom-node this)
+                              "reabledit-cell--selected")
+        (.focus (aget (dom/getElementsByClass "reabledit-focused"
+                                              (reagent/dom-node this))
+                      0))))
+    :reagent-render
+    (fn [{:keys [primary-key row-change-fn state
+                 column-keys row-ids row-data column]}]
+      (let [column-key (:key column)
+            row-id (get row-data primary-key)
+            {:keys [selected? edited? width]} @(reagent/track util/cell-state
+                                                              primary-key
+                                                              state
+                                                              column-key
+                                                              row-id)
+            change-this-row! (partial row-change-fn
+                                      (util/find-index row-ids row-id)
+                                      row-data)
+            enable-edit! (partial util/enable-edit! state)
+            disable-edit-and-select-this-cell! #(util/move-to-cell! primary-key
+                                                                    row-change-fn
+                                                                    state
+                                                                    row-ids
+                                                                    row-data
+                                                                    column-key)]
+        [:div.reabledit-cell
+         {:id (str "reabledit-cell-" row-id "-" column-key)
+          :class (if selected? "reabledit-cell--selected")
+          :style {:width (util/column-width (count column-keys) width)}
+          :on-click #(if-not edited?
+                       (disable-edit-and-select-this-cell!))
+          :on-double-click enable-edit!}
+         (if edited?
+           [(or (:editor column) default-editor)
+            row-data
+            (get @state :edited-row-data)
+            column-key
+            #(swap! state assoc :edited-row-data %)
+            change-this-row!
+            disable-edit-and-select-this-cell!
+            (:opts column)]
+           [(or (:view column) default-view)
+            row-data
+            column-key
+            change-this-row!
+            enable-edit!
+            (:opts column)])]))}))
 
 (defn data-table-row
   [{:keys [columns primary-key row-change-fn state
@@ -209,7 +211,7 @@
 
 (defn data-table-headers
   [{:keys [columns state]}]
-  (let [column-data (:columns @state)
+  (let [column-widths (:column-widths @state)
         scrollbar-size (util/vertical-scrollbar-size (:main-el @state))]
     [:div.reabledit-row.reabledit-row--header
      (if (:resize @state)
@@ -225,7 +227,7 @@
        [:div.reabledit-cell.reabledit-cell--header
         {:id (util/header-id key)
          :style {:width (util/column-width (count columns)
-                                           (get-in column-data [key :width]))}}
+                                           (get column-widths key))}}
         [:span.reabledit-cell__content.reabledit-cell__content--header value]
         [:div.reabledit-cell__header-handle
          {:draggable true

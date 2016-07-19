@@ -32,6 +32,12 @@
               column-keys (mapv :key columns)
               row-ids (mapv #(get % primary-key) data)]
           [:div.reabledit
+           {:on-key-down #(util/handle-key-down %
+                                                columns
+                                                data
+                                                primary-key
+                                                row-change-fn
+                                                state)}
            [components/data-table-headers {:columns columns
                                            :state state}]
            [:div.reabledit-data-rows
