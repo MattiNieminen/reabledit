@@ -141,7 +141,8 @@
 ;;
 
 (defn data-table-cell
-  [primary-key row-change-fn state column-keys row-ids row-data column]
+  [{:keys [primary-key row-change-fn state
+           column-keys row-ids row-data column]}]
   (let [column-key (:key column)
         row-id (get row-data primary-key)
         {:keys [selected? edited? width]} @(reagent/track util/cell-info
@@ -193,21 +194,21 @@
         (:opts column)])]))
 
 (defn data-table-row
-  [columns primary-key row-change-fn state column-keys row-ids row-data]
+  [{:keys [columns primary-key row-change-fn state
+           column-keys row-ids row-data]}]
   [:div.reabledit-row
    (for [column columns]
      ^{:key (:key column)}
-     [data-table-cell
-      primary-key
-      row-change-fn
-      state
-      column-keys
-      row-ids
-      row-data
-      column])])
+     [data-table-cell {:primary-key primary-key
+                       :row-change-fn row-change-fn
+                       :state state
+                       :column-keys column-keys
+                       :row-ids row-ids
+                       :row-data row-data
+                       :column column}])])
 
 (defn data-table-headers
-  [columns state]
+  [{:keys [columns state]}]
   (let [column-data (:columns @state)
         scrollbar-size (util/vertical-scrollbar-size (:main-el @state))]
     [:div.reabledit-row.reabledit-row--header

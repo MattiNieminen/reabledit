@@ -17,14 +17,14 @@
 ;;
 
 (defn data-table
-  [columns data primary-key row-change-fn]
+  [{:keys [columns data primary-key row-change-fn]}]
   (let [state (reagent/atom {})]
     (reagent/create-class
      {:component-did-mount
       (fn [this]
         (swap! state assoc :main-el (reagent/dom-node this)))
       :reagent-render
-      (fn [columns data primary-key row-change-fn]
+      (fn [{:keys [columns data primary-key row-change-fn]}]
         (let [header-row-el (aget (dom/getElementsByClass
                                    "reabledit-row--header"
                                    (:main-el @state))
@@ -32,7 +32,8 @@
               column-keys (mapv :key columns)
               row-ids (mapv #(get % primary-key) data)]
           [:div.reabledit
-           [components/data-table-headers columns state]
+           [components/data-table-headers {:columns columns
+                                           :state state}]
            [:div.reabledit-data-rows
             (if header-row-el
               {:style {:height (str "calc(100% - "
@@ -44,11 +45,10 @@
                                     (-> e .-target .-scrollLeft))))})
             (for [row-data data]
               ^{:key (get row-data primary-key)}
-              [components/data-table-row
-               columns
-               primary-key
-               row-change-fn
-               state
-               column-keys
-               row-ids
-               row-data])]]))})))
+              [components/data-table-row {:columns columns
+                                          :primary-key primary-key
+                                          :row-change-fn row-change-fn
+                                          :state state
+                                          :column-keys column-keys
+                                          :row-ids row-ids
+                                          :row-data row-data}])]]))})))

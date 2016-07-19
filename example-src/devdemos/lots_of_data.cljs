@@ -28,5 +28,8 @@
   (fn [data-atom _]
     [:div
      {:style {:height "430px"}}
-     [reabledit/data-table example-columns @data-atom :id example-row-fn]])
+     [reabledit/data-table {:columns example-columns
+                            :data @data-atom
+                            :primary-key :id
+                            :row-change-fn example-row-fn}]])
   example-atom)

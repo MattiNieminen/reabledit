@@ -55,6 +55,9 @@
                    (let [new-row-id (inc (apply max (map :id @data-atom)))]
                      (swap! data-atom #(vec (cons {:id new-row-id} %)))))}
       "Add row to top"]
-     [reabledit/data-table example-columns @data-atom :id example-row-fn]])
+     [reabledit/data-table {:columns example-columns
+                            :data @data-atom
+                            :primary-key :id
+                            :row-change-fn example-row-fn}]])
   example-atom
   {:inspect-data true})
