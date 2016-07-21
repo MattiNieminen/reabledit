@@ -43,6 +43,7 @@
   background-color: #fff;
   height: 30px;
   outline: none;
+  cursor: pointer;
   overflow: hidden;
 }
 
@@ -56,18 +57,17 @@
   font-weight: bold;
   display: flex;
   justify-content: space-between;
+  cursor: initial;
 }
 
-.reabledit-cell__content {
-  padding-left: 7px;
-}
-
-.reabledit-cell__content--header {
-  overflow: hidden;
+.reabledit-cell__header-text {
+  flex: 0 0 auto;
+  width: calc(100% - 5px);
 }
 
 .reabledit-cell__header-handle {
-  flex: 0 0 5px;
+  flex: 0 0 auto;
+  width: 5px;
   cursor: ew-resize;
 }
 
@@ -76,59 +76,79 @@
   border-bottom: 1px solid #ddd;
 }
 
-/* Views, their items and modifiers */
+/* Read-only cell */
 
-.reabledit-cell-view {
+.reabledit-read-only-cell {
   position: relative;
-  z-index: 1;
+  height: 100%;
 }
 
-.reabledit-cell-view__hidden-input-handler {
+.reabledit-read-only-cell__input {
   position: absolute;
+  width: 0;
   opacity: 0;
 }
 
-/* Cell editors, their items and modifiers */
-
-.reabledit-cell-editor-input {
-  width: 100%;
+.reabledit-read-only-cell__view {
+  position: absolute;
+  width: calc(100% - 7px);
   height: 100%;
-  padding-left: 6px;
-  font-size: 95%;
-  box-sizing: border-box;
-  border: 0;
+  padding: 0 0 0 7px;
 }
 
-.reabledit-cell-editor-input--error {
-  background-color: #ffadbb;
-  color: #d82a32;
+/* Standard cell */
+
+.reabledit-standard-cell {
+  position: relative;
+  height: 100%;
 }
 
-.reabledit-cell-editor-dropdown {
+.reabledit-standard-cell__item {
+  position: absolute;
+  width: calc(100% - 7px);
+  height: 100%;
+  padding: 0 0 0 7px;
+  font-size: inherit;
+  border: none;
+}
+
+.reabledit-standard-cell__item--hidden {
+  opacity: 0;
+}
+
+/* Dropdown cell */
+
+.reabledit-dropdown-cell {
   position: absolute;
   width: inherit;
+  height: inherit;
 }
 
-.reabledit-cell-editor-dropdown:focus {
-  outline: none;
-}
-
-.reabledit-cell-editor-dropdown-list {
+.reabledit-dropdown-cell__input {
   position: absolute;
-  z-index: 2;
-  margin-top: 10px;
-  background-color: #fff;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  width: 0;
+  cursor: inherit;
+  opacity: 0;
+}
+
+.reabledit-dropdown-cell__view {
+  padding: 0 0 0 7px;
+}
+
+.reabledit-dropdown-cell-options {
+  position: absolute;
   width: 100%;
+  margin-top: 8px;
+  z-index: 1;
+  background-color: #fff;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2)
 }
 
-.reabledit-cell-editor-dropdown-list__item {
-  display: flex;
-  align-items: center;
-  height: 30px;
+.reabledit-dropdown-cell-options__item {
+  padding: 3px 0 3px 7px;
 }
 
-.reabledit-cell-editor-dropdown-list__item--selected {
+.reabledit-dropdown-cell-options__item--selected {
   background-color: #4ca2d8;
   color: #fff;
 }

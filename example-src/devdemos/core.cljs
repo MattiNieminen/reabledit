@@ -1,7 +1,7 @@
 (ns devdemos.core
   (:require [reagent.core :as reagent]
             [reabledit.core :as reabledit]
-            [reabledit.components :as components])
+            [reabledit.cells :as cells])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (def example-options
@@ -14,16 +14,17 @@
 
 (def example-columns
   [{:key :id
-    :value "ID"}
+    :value "ID"
+    :cell cells/read-only-cell}
    {:key :name
-    :value "Name (not the secret identity)"}
+    :value "Name (not the secret identity)"
+    :cell cells/standard-cell}
    {:key :age
     :value "Age"
-    :editor components/int-editor}
+    :cell cells/standard-cell}
    {:key :publisher
     :value "Publisher"
-    :view components/dropdown-view
-    :editor components/dropdown-editor
+    :cell cells/dropdown-cell
     :opts {:options example-options}}])
 
 (def example-data
@@ -42,8 +43,8 @@
 
 (defonce example-atom (reagent/atom example-data))
 
-(defn example-row-fn
-  [nth-row old-row new-row]
+(defn example-row-change-fn
+  [nth-row new-row]
   (swap! example-atom reabledit/update-row nth-row new-row))
 
 (defcard-rg reabledit
@@ -57,6 +58,6 @@
      [reabledit/data-table {:columns example-columns
                             :data @data-atom
                             :primary-key :id
-                            :row-change-fn example-row-fn}]])
+                            :row-change-fn example-row-change-fn}]])
   example-atom
   {:inspect-data true})
