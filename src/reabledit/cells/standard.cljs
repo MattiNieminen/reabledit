@@ -53,7 +53,8 @@
                         (commit! (assoc row-data column-key @input)))
                       (reset! input nil))]
         [:div.reabledit-standard-cell
-         {:on-double-click #(reset! input v)}
+         {:on-double-click #(reset! input v)
+          :title v}
          [:input.reabledit-standard-cell__item.reabledit-focused
           {:class (if-not @input "reabledit-standard-cell__item--hidden")
            :type "text"

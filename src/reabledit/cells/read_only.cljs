@@ -5,6 +5,7 @@
   [{:keys [row-data column-key]}]
   (let [v (get row-data column-key)]
     [:div.reabledit-read-only-cell
+     {:title v}
      [:input.reabledit-read-only-cell__input.reabledit-focused
       {:type "text"
        :value ""

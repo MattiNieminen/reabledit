@@ -69,7 +69,8 @@
                         (commit! (assoc row-data column-key @selected)))
                       (reset! selected nil))]
         [:div.reabledit-dropdown-cell
-         {:on-double-click #(reset! selected k)}
+         {:on-double-click #(reset! selected k)
+          :title v}
          [:input.reabledit-dropdown-cell__input.reabledit-focused
           {:type "text"
            :value ""
