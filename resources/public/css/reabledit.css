@@ -62,7 +62,8 @@
 
 .reabledit-cell__header-text {
   flex: 0 0 auto;
-  width: calc(100% - 5px);
+  width: calc(100% - 13px);
+  padding: 0 0 0 7px;
 }
 
 .reabledit-cell__header-handle {
