@@ -55,6 +55,7 @@
   (let [column-widths (:column-widths @state)
         scrollbar-size (util/vertical-scrollbar-size (:main-el @state))]
     [:div.reabledit-row.reabledit-row--header
+     {:style {:padding-right (str scrollbar-size "px")}}
      (if (:resize @state)
        [:div.reabledit-resize-area
         {:on-drag-over (fn [e]
