@@ -120,9 +120,8 @@
 /* Dropdown cell */
 
 .reabledit-dropdown-cell {
-  position: absolute;
-  width: inherit;
-  height: inherit;
+  width: 100%;
+  height: 100%;
 }
 
 .reabledit-dropdown-cell__input {
@@ -132,13 +131,22 @@
   opacity: 0;
 }
 
-.reabledit-dropdown-cell__view {
-  padding: 0 0 0 7px;
+.reabledit-dropdown-cell-view {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px 0 7px;
+}
+
+.reabledit-dropdown-cell-view__text {
+  flex: 1 0 0px;
+}
+
+.reabledit-dropdown-cell-view__caret {
+  flex: 0 1 0px;
 }
 
 .reabledit-dropdown-cell-options {
   position: absolute;
-  width: 100%;
   margin-top: 8px;
   z-index: 1;
   background-color: #fff;
@@ -146,7 +154,8 @@
 }
 
 .reabledit-dropdown-cell-options__item {
-  padding: 3px 0 3px 7px;
+    padding: 3px calc(100% - 7px) 3px 7px;
+    white-space: nowrap;
 }
 
 .reabledit-dropdown-cell-options__item--selected {

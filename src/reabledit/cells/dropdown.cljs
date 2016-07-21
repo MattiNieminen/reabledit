@@ -79,7 +79,10 @@
            :on-copy #(util/set-clipboard-data % v)
            :on-paste #(handle-paste % selected options commit!)
            :on-cut #(util/set-clipboard-data % v)}]
-         [:span.reabledit-dropdown-cell__view v]
+         [:div.reabledit-dropdown-cell-view
+          [:span.reabledit-dropdown-cell-ciew__text v]
+          [:span.reabledit-dropdown-cell-view__caret
+           (if @selected "▼" "►")]]
          (if-let [selected-key @selected]
            [:div.reabledit-dropdown-cell-options
             (for [{:keys [key value]} options]
@@ -90,4 +93,4 @@
                 :on-click (fn [e]
                             (reset! selected key)
                             (commit!))}
-               [:span value]])])]))))
+               value])])]))))
