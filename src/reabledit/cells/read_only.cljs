@@ -10,5 +10,6 @@
       {:type "text"
        :value ""
        :on-key-down #(if (= (.-keyCode %) 13) (.stopPropagation %))
-       :on-copy #(util/set-clipboard-data % v)}]
+       :on-copy #(util/set-clipboard-data % v)
+       :on-cut #(util/set-clipboard-data % v)}]
      [:span.reabledit-read-only-cell__view v]]))
