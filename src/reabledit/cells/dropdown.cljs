@@ -58,9 +58,9 @@
       (commit!))))
 
 (defn dropdown-cell
-  [{:keys [row-data column-key selected? commit! opts]}]
+  [{:keys [row-data column-key commit! opts]}]
   (let [selected (reagent/atom nil)]
-    (fn [{:keys [row-data column-key selected? commit! opts]}]
+    (fn [{:keys [row-data column-key commit! opts]}]
       (let [options (:options opts)
             k (get row-data column-key)
             v (-> (filter #(= (:key %) k) options) first :value)
