@@ -15,28 +15,33 @@
     (js/parseInt s)
     fallback))
 
+(defn set-state!
+  [state v]
+  (reset! state {:edit? true
+                 :input v}))
+
 (defn handle-key-down
-  [e input v commit!]
-  (let [keycode (.-keyCode e)]
+  [e state v commit!]
+  (let [keycode (.-keyCode e)
+        {:keys [edit? input]} @state]
     (cond
 
-      ;; Enter and F2 start edit mode from clean state
-      (and (not @input)
-           (contains? #{13 113} keycode))
+      ;; Enter and F2 start edit mode with old value
+      (and (not edit?) (contains? #{13 113} keycode))
       (do
         (.preventDefault e)
         (.stopPropagation e)
-        (reset! input v))
+        (set-state! state v))
 
       ;; Enter in edit mode commits changes
-      (and @input (= keycode 13))
+      (and edit? (= keycode 13))
       (do
         (.preventDefault e)
         (commit!))
 
       ;; Navigation with arrow keys is blocked in
       ;; edit mode
-      (and @input (contains? #{37 38 39 40} keycode))
+      (and edit? (contains? #{37 38 39 40} keycode))
       (.stopPropagation e)
 
       :else nil)))
@@ -45,32 +50,33 @@
 
 (defn standard-cell
   [{:keys [row-data column-key commit!]}]
-  (let [input (reagent/atom nil)]
+  (let [state (reagent/atom nil)]
     (fn [{:keys [row-data column-key commit!]}]
       (let [v (get row-data column-key)
             commit! (fn []
-                      (if (and @input (not= @input v))
-                        (commit! (assoc row-data column-key @input)))
-                      (reset! input nil))]
+                      (if (and (:edit? @state) (not= (:input @state) v))
+                        (commit! (assoc row-data column-key (:input @state))))
+                      (reset! state nil))]
         [:div.reabledit-standard-cell
-         {:on-double-click #(reset! input v)
+         {:on-double-click #(if-not (:edit? @state) (set-state! state v))
           :title v}
          [:input.reabledit-standard-cell__item.reabledit-focused
-          {:class (if-not @input "reabledit-standard-cell__item--hidden")
+          {:class (if-not (:edit? @state)
+                    "reabledit-standard-cell__item--hidden")
            :type "text"
-           :value @input
-           :on-change #(reset! input (-> % .-target .-value))
-           :on-key-down #(handle-key-down % input v commit!)
+           :value (:input @state)
+           :on-change #(set-state! state (-> % .-target .-value))
+           :on-key-down #(handle-key-down % state v commit!)
            :on-focus util/move-cursor-to-end!
            :on-blur commit!
-           :on-copy #(if-not @input (util/set-clipboard-data % v))
-           :on-paste #(when (not @input)
-                        (reset! input (util/get-clipboard-data %))
+           :on-copy #(if-not (:edit? @state) (util/set-clipboard-data % v))
+           :on-paste #(when (not (:edit? @state))
+                        (set-state! state (util/get-clipboard-data %))
                         (commit!))
-           :on-cut #(when (not @input)
+           :on-cut #(when (not (:edit? @state))
                       (util/set-clipboard-data % v)
-                      (reset! input "")
+                      (set-state! state "")
                       (commit!))}]
-         (if-not @input
+         (if-not (:edit? @state)
            [:span.reabledit-standard-cell__item
             v])]))))
