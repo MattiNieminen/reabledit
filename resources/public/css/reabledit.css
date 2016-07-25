@@ -144,6 +144,7 @@
 
 .reabledit-dropdown-cell-view__text {
   flex: 0 1 0px;
+  white-space: nowrap;
 }
 
 .reabledit-dropdown-cell-view__caret {
