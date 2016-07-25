@@ -92,7 +92,6 @@
 
 .reabledit-read-only-cell__view {
   position: absolute;
-  width: calc(100% - 7px);
   height: 100%;
   padding: 0 0 0 7px;
 }
