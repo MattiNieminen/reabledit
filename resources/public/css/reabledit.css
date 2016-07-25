@@ -143,7 +143,7 @@
 }
 
 .reabledit-dropdown-cell-view__text {
-  flex: 1 0 0px;
+  flex: 0 1 0px;
 }
 
 .reabledit-dropdown-cell-view__caret {
@@ -159,8 +159,8 @@
 }
 
 .reabledit-dropdown-cell-options__item {
-    padding: 3px calc(100% - 7px) 3px 7px;
-    white-space: nowrap;
+  padding: 3px 150px 3px 7px;
+  white-space: nowrap;
 }
 
 .reabledit-dropdown-cell-options__item--selected {

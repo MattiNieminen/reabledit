@@ -89,7 +89,7 @@
            :on-paste #(handle-paste % state options commit!)
            :on-cut #(util/set-clipboard-data % v)}]
          [:div.reabledit-dropdown-cell-view
-          [:span.reabledit-dropdown-cell-ciew__text v]
+          [:span.reabledit-dropdown-cell-view__text v]
           [:span.reabledit-dropdown-cell-view__caret
            (if (:edit? @state) "▼" "►")]]
          (if (:edit? @state)
