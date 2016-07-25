@@ -101,19 +101,25 @@
 .reabledit-standard-cell {
   position: relative;
   height: 100%;
+  padding: 0 0 0 7px;
 }
 
-.reabledit-standard-cell__item {
+.reabledit-standard-cell__input {
   position: absolute;
-  width: calc(100% - 7px);
   height: 100%;
-  padding: 0 0 0 7px;
+  width: calc(100% - 7px);
   font-size: inherit;
   border: none;
 }
 
-.reabledit-standard-cell__item--hidden {
+.reabledit-standard-cell__input--hidden {
+  width: 0;
   opacity: 0;
+}
+
+.reabledit-standard-cell__view {
+  position: absolute;
+  height: 100%;
 }
 
 /* Dropdown cell */

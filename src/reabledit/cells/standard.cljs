@@ -60,9 +60,9 @@
         [:div.reabledit-standard-cell
          {:on-double-click #(if-not (:edit? @state) (set-state! state v))
           :title v}
-         [:input.reabledit-standard-cell__item.reabledit-focused
+         [:input.reabledit-standard-cell__input.reabledit-focused
           {:class (if-not (:edit? @state)
-                    "reabledit-standard-cell__item--hidden")
+                    "reabledit-standard-cell__input--hidden")
            :type "text"
            :value (:input @state)
            :on-change #(set-state! state (-> % .-target .-value))
@@ -78,5 +78,5 @@
                       (set-state! state "")
                       (commit!))}]
          (if-not (:edit? @state)
-           [:span.reabledit-standard-cell__item
+           [:span.reabledit-standard-cell__view
             v])]))))
