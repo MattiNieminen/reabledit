@@ -85,6 +85,7 @@
            :value ""
            :on-key-down #(handle-key-down % state options k commit!)
            :on-change #(handle-on-change % state options k)
+           :on-blur #(if-not (= k (:selected @state)) (commit!))
            :on-copy #(util/set-clipboard-data % v)
            :on-paste #(handle-paste % state options commit!)
            :on-cut #(util/set-clipboard-data % v)}]
