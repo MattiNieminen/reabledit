@@ -74,11 +74,12 @@
                         (commit! (assoc row-data
                                         column-key
                                         (:selected @state))))
-                      (reset! state nil))]
+                      (reset! state nil))
+            toggle-options! #(if (:edit? @state)
+                               (reset! state nil)
+                               (set-state! state k))]
         [:div.reabledit-dropdown-cell
-         {:on-double-click #(if (:edit? @state)
-                              (reset! state nil)
-                              (set-state! state k))
+         {:on-double-click toggle-options!
           :title v}
          [:input.reabledit-dropdown-cell__input.reabledit-focused
           {:type "text"
@@ -92,6 +93,7 @@
          [:div.reabledit-dropdown-cell-view
           [:span.reabledit-dropdown-cell-view__text v]
           [:span.reabledit-dropdown-cell-view__caret
+           {:on-click toggle-options!}
            (if (:edit? @state) "▼" "►")]]
          (if (:edit? @state)
            (let [selected-key (:selected @state)]

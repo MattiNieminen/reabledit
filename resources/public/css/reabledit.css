@@ -139,6 +139,7 @@
 .reabledit-dropdown-cell-view {
   display: flex;
   justify-content: space-between;
+  height: 100%;
   padding: 0 10px 0 7px;
 }
 
@@ -149,6 +150,7 @@
 
 .reabledit-dropdown-cell-view__caret {
   flex: 0 1 0px;
+  padding: 0 5px;
 }
 
 .reabledit-dropdown-cell-options {
