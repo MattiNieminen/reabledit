@@ -150,7 +150,8 @@
 
 .reabledit-dropdown-cell-view__caret {
   flex: 0 1 0px;
-  padding: 0 5px;
+  padding: 15% 5px 0px 5px;
+  font-size: 12px;
 }
 
 .reabledit-dropdown-cell-options {

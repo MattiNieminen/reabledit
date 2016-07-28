@@ -94,7 +94,7 @@
           [:span.reabledit-dropdown-cell-view__text v]
           [:span.reabledit-dropdown-cell-view__caret
            {:on-click toggle-options!}
-           (if (:edit? @state) "▼" "►")]]
+           "▼"]]
          (if (:edit? @state)
            (let [selected-key (:selected @state)]
              [:div.reabledit-dropdown-cell-options
