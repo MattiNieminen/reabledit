@@ -20,30 +20,17 @@
   [{:keys [columns data primary-key row-change-fn]}]
   (let [state (reagent/atom {})]
     (reagent/create-class
-     {:component-did-mount
-      (fn [this]
-        (swap! state assoc :main-el (reagent/dom-node this)))
+     {:component-did-mount #(util/post-render (reagent/dom-node %))
+      :component-did-update #(util/post-render (reagent/dom-node %))
       :reagent-render
       (fn [{:keys [columns data primary-key row-change-fn]}]
-        (let [header-row-el (aget (dom/getElementsByClass
-                                   "reabledit-row--header"
-                                   (:main-el @state))
-                                  0)
-              column-keys (mapv :key columns)
+        (let [column-keys (mapv :key columns)
               row-ids (mapv #(get % primary-key) data)]
           [:div.reabledit
            {:on-key-down #(util/handle-key-down % state column-keys row-ids)}
            [components/data-table-headers {:columns columns
                                            :state state}]
            [:div.reabledit-data-rows
-            (if header-row-el
-              {:style {:height (str "calc(100% - "
-                                    (.-clientHeight header-row-el)
-                                    "px)")}
-               :on-scroll (fn [e]
-                            (when (= (.-currentTarget e) (.-target e))
-                              (set! (.-scrollLeft header-row-el)
-                                    (-> e .-target .-scrollLeft))))})
             (for [row-data data]
               ^{:key (get row-data primary-key)}
               [components/data-table-row {:columns columns

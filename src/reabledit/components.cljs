@@ -52,10 +52,8 @@
 
 (defn data-table-headers
   [{:keys [columns state]}]
-  (let [column-widths (:column-widths @state)
-        scrollbar-size (util/vertical-scrollbar-size (:main-el @state))]
+  (let [column-widths (:column-widths @state)]
     [:div.reabledit-row.reabledit-row--header
-     {:style {:padding-right (str scrollbar-size "px")}}
      (if (:resize @state)
        [:div.reabledit-resize-area
         {:on-drag-over (fn [e]
@@ -75,6 +73,4 @@
          {:draggable true
           :on-drag-start #(util/start-resize! % key state)
           :on-drag-end #(util/stop-resize! state)}]])
-     (if (> scrollbar-size 0)
-       [:div.reabledit-cell__header-scroll
-        {:style {:min-width (str scrollbar-size "px")}}])]))
+     [:div.reabledit-cell__header-scroll]]))

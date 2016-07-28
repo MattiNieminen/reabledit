@@ -106,15 +106,22 @@
     (set! (.-selectionStart el) length)
     (set! (.-selectionEnd el) length)))
 
-(defn vertical-scrollbar-size
+(defn post-render
   [main-el]
-  (let [scroll-el (aget (dom/getElementsByClass
-                         "reabledit-data-rows"
-                         main-el)
-                        0)]
-    (if scroll-el
-      (- (.-offsetWidth scroll-el) (.-clientWidth scroll-el))
-      0)))
+  (let [data-rows-el (dom/getElementByClass "reabledit-data-rows" main-el)
+        header-row-el (dom/getElementByClass "reabledit-row--header" main-el)
+        header-scroll-el (dom/getElementByClass "reabledit-cell__header-scroll"
+                                                main-el)
+        _ (aset (.-style data-rows-el)
+                "height"
+                (str "calc(100% - " (.-clientHeight header-row-el) "px)"))
+        scrollbar-width (- (.-offsetWidth data-rows-el) (.-clientWidth data-rows-el))]
+    (aset data-rows-el "onscroll" (fn [e]
+                                    (when (= (.-currentTarget e) (.-target e))
+                                      (set! (.-scrollLeft header-row-el)
+                                            (-> e .-target .-scrollLeft)))))
+    (aset (.-style header-row-el) "padding-right" (str scrollbar-width "px"))
+    (aset (.-style header-scroll-el) "min-width" (str scrollbar-width "px"))))
 
 (defn start-resize!
   [e k state]
