@@ -86,7 +86,10 @@
            :value ""
            :on-key-down #(handle-key-down % state options k commit!)
            :on-change #(handle-on-change % state options k)
-           :on-blur #(if-not (= k (:selected @state)) (commit!))
+
+           ;; A hack. Should use relatedTarget, but Firefox
+           ;; does not support it yet. Fix in the future.
+           :on-blur #(if (:edit? @state) (js/setTimeout commit! 100))
            :on-copy #(util/set-clipboard-data % v)
            :on-paste #(handle-paste % state options commit!)
            :on-cut #(util/set-clipboard-data % v)}]
