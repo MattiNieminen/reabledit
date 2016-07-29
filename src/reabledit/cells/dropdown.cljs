@@ -89,7 +89,7 @@
 
            ;; A hack. Should use relatedTarget, but Firefox
            ;; does not support it yet. Fix in the future.
-           :on-blur #(if (:edit? @state) (js/setTimeout commit! 100))
+           :on-blur #(if (:edit? @state) (js/setTimeout commit! 500))
            :on-copy #(util/set-clipboard-data % v)
            :on-paste #(handle-paste % state options commit!)
            :on-cut #(util/set-clipboard-data % v)}]
