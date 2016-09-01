@@ -20,8 +20,22 @@
   [{:keys [columns data primary-key row-change-fn]}]
   (let [state (reagent/atom {})]
     (reagent/create-class
-     {:component-did-mount #(util/post-render (reagent/dom-node %))
-      :component-did-update #(util/post-render (reagent/dom-node %))
+     {:component-did-mount
+      (fn [this]
+        (util/post-render (reagent/dom-node this))
+        (util/add-blur-emulator! state
+                                 #(if-not (dom/getAncestorByClass (.-target %)
+                                                                  "reabledit")
+                                    (swap! state
+                                           dissoc
+                                           :selected-row-id
+                                           :selected-column-key))))
+      :component-did-update
+      (fn [this _]
+        (util/post-render (reagent/dom-node this)))
+      :component-will-unmount
+      (fn [_]
+        (util/remove-blur-emulator! state))
       :reagent-render
       (fn [{:keys [columns data primary-key row-change-fn]}]
         (let [column-keys (mapv :key columns)
