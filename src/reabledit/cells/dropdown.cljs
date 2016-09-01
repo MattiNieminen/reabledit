@@ -69,7 +69,8 @@
      {:component-did-mount
       (fn [this]
         (util/add-blur-emulator! state
-                                 #(if-not (dom/contains this (.-target %))
+                                 #(if-not (dom/getAncestorByClass (.-target %)
+                                                                  "reabledit-dropdown-cell")
                                     (swap! state dissoc :edit? :selected))))
       :component-will-unmount
       (fn [_]
