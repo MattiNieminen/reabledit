@@ -1,12 +1,12 @@
 (ns reabledit.cells.dropdown
   (:require [reabledit.util :as util]
             [clojure.string :as str]
-            [reagent.core :as reagent]))
+            [reagent.core :as reagent]
+            [goog.dom :as dom]))
 
 (defn set-state!
   [state v]
-  (reset! state {:edit? true
-                 :selected v}))
+  (swap! state assoc :edit? true :selected v))
 
 (defn handle-key-down
   [e state options k commit!]
@@ -65,48 +65,54 @@
 (defn dropdown-cell
   [{:keys [row-data column-key commit! opts]}]
   (let [state (reagent/atom nil)]
-    (fn [{:keys [row-data column-key commit! opts]}]
-      (let [options (:options opts)
-            k (get row-data column-key)
-            v (-> (filter #(= (:key %) k) options) first :value)
-            commit! (fn []
-                      (if (and (:edit? @state) (not= (:selected @state) k))
-                        (commit! (assoc row-data
-                                        column-key
-                                        (:selected @state))))
-                      (reset! state nil))
-            toggle-options! #(if (:edit? @state)
-                               (reset! state nil)
-                               (set-state! state k))]
-        [:div.reabledit-dropdown-cell
-         {:on-double-click toggle-options!
-          :title v}
-         [:input.reabledit-dropdown-cell__input.reabledit-focused
-          {:type "text"
-           :value ""
-           :on-key-down #(handle-key-down % state options k commit!)
-           :on-change #(handle-on-change % state options k)
-
-           ;; A hack. Should use relatedTarget, but Firefox
-           ;; does not support it yet. Fix in the future.
-           :on-blur #(if (:edit? @state) (js/setTimeout commit! 500))
-           :on-copy #(util/set-clipboard-data % v)
-           :on-paste #(handle-paste % state options commit!)
-           :on-cut #(util/set-clipboard-data % v)}]
-         [:div.reabledit-dropdown-cell-view
-          [:span.reabledit-dropdown-cell-view__text v]
-          [:span.reabledit-dropdown-cell-view__caret
-           {:on-click toggle-options!}
-           "▼"]]
-         (if (:edit? @state)
-           (let [selected-key (:selected @state)]
-             [:div.reabledit-dropdown-cell-options
-              (for [{:keys [key value]} options]
-                ^{:key key}
-                [:div.reabledit-dropdown-cell-options__item
-                 {:class (if (= selected-key key)
-                           "reabledit-dropdown-cell-options__item--selected")
-                  :on-click (fn [e]
-                              (set-state! state key)
-                              (commit!))}
-                 value])]))]))))
+    (reagent/create-class
+     {:component-did-mount
+      (fn [this]
+        (util/add-blur-emulator! state
+                                 #(if-not (dom/contains this (.-target %))
+                                    (swap! state dissoc :edit? :selected))))
+      :component-will-unmount
+      (fn [_]
+        (util/remove-blur-emulator! state))
+      :reagent-render
+      (fn [{:keys [row-data column-key commit! opts]}]
+        (let [options (:options opts)
+              k (get row-data column-key)
+              v (-> (filter #(= (:key %) k) options) first :value)
+              commit! (fn []
+                        (if (and (:edit? @state) (not= (:selected @state) k))
+                          (commit! (assoc row-data
+                                          column-key
+                                          (:selected @state))))
+                        (swap! state dissoc :edit? :selected))
+              toggle-options! #(if (:edit? @state)
+                                 (reset! state nil)
+                                 (set-state! state k))]
+          [:div.reabledit-dropdown-cell
+           {:on-double-click toggle-options!
+            :title v}
+           [:input.reabledit-dropdown-cell__input.reabledit-focused
+            {:type "text"
+             :value ""
+             :on-key-down #(handle-key-down % state options k commit!)
+             :on-change #(handle-on-change % state options k)
+             :on-copy #(util/set-clipboard-data % v)
+             :on-paste #(handle-paste % state options commit!)
+             :on-cut #(util/set-clipboard-data % v)}]
+           [:div.reabledit-dropdown-cell-view
+            [:span.reabledit-dropdown-cell-view__text v]
+            [:span.reabledit-dropdown-cell-view__caret
+             {:on-click toggle-options!}
+             "▼"]]
+           (if (:edit? @state)
+             (let [selected-key (:selected @state)]
+               [:div.reabledit-dropdown-cell-options
+                (for [{:keys [key value]} options]
+                  ^{:key key}
+                  [:div.reabledit-dropdown-cell-options__item
+                   {:class (if (= selected-key key)
+                             "reabledit-dropdown-cell-options__item--selected")
+                    :on-click (fn [e]
+                                (set-state! state key)
+                                (commit!))}
+                   value])]))]))})))

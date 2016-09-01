@@ -1,5 +1,6 @@
 (ns reabledit.util
-  (:require [goog.dom :as dom]))
+  (:require [goog.dom :as dom]
+            [goog.events :as events]))
 
 (def min-column-width 15)
 
@@ -149,3 +150,16 @@
   [e v]
   (.preventDefault e)
   (.setData (.-clipboardData e) "text/plain" v))
+
+(defn add-blur-emulator!
+  [state on-blur-fn]
+  (swap! state
+         assoc
+         :blur-emulator
+         (events/listen js/window
+                        events/EventType.CLICK
+                        on-blur-fn)))
+
+(defn remove-blur-emulator!
+  [state]
+  (events/unlistenByKey (:blur-emulator @state)))
